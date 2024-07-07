@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "plai"
+version = "0.1.0"
+description = ""
+authors = ["0x00-pl <0x00.pl@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = "^2.5.1"
+numpy = "^2.1.2"
+pytest = "^8.3.3"
+
+
+[[tool.poetry.source]]
+name = "tencent"
+url = "https://mirrors.cloud.tencent.com/pypi/simple/"
+priority = "primary"
+
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
