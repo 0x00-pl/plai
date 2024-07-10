@@ -6,10 +6,9 @@ authors = ["0x00-pl <0x00.pl@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.13"
 torch = "^2.5.1"
 numpy = "^2.1.2"
-pytest = "^8.3.3"
 
 
 [[tool.poetry.source]]
@@ -21,6 +20,10 @@ priority = "primary"
 [[tool.poetry.source]]
 name = "PyPI"
 priority = "primary"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
 
 [build-system]
 requires = ["poetry-core"]

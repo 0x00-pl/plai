@@ -9,14 +9,15 @@
 技术选型
 -------
 
-- 使用python来实现, 因为python代码读写更方便.
+- 使用python来实现, 因为python代码读写更方便. 尽量使用最新的python.
 - 依赖pytorch, 使用pytorch来接入更多常见模型.
 
 
 开发计划
 -------
 
-- 引入pytorch
-- 编译简单的四则运算
-- 简单的四则运算运行时
+- [x] 引入pytorch
+- [ ] 接入torch dynamo
+- [ ] 编译简单的四则运算
+- [ ] 简单的四则运算运行时
 

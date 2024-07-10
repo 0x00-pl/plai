@@ -1,6 +1,5 @@
 import torch
 
-
 def test_add():
     a = torch.tensor(1)
     b = torch.tensor(1)
