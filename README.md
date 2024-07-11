@@ -21,3 +21,17 @@
 - [ ] 编译简单的四则运算
 - [ ] 简单的四则运算运行时
 
+
+commands
+--------
+
+testing:
+```shell
+pytest tests
+```
+
+generate requirements.txt:
+```shell
+poetry export --format requirements.txt --output requirements.txt --without-hashes
+```
+

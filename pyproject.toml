@@ -6,9 +6,9 @@ authors = ["0x00-pl <0x00.pl@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.13"
-torch = "^2.5.1"
+python = "^3.12"
 numpy = "^2.1.2"
+torch = "^2.5.1"
 
 
 [[tool.poetry.source]]
