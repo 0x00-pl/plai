@@ -1,0 +1,35 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - master  # 在推送到主分支 master 时运行
+  pull_request:
+    branches:
+      - master  # 在提交到 master 分支的 PR 时运行
+
+jobs:
+  test:
+    runs-on: ubuntu-latest  # 在 Ubuntu 环境中运行
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'  # 使用 Python 3.12
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          export PATH="$HOME/.local/bin:$PATH"  # 将 Poetry 添加到路径中
+
+      - name: Install dependencies
+        run: |
+          poetry install  # 使用 Poetry 安装依赖
+
+      - name: Run tests
+        run: |
+          poetry run pytest  # 使用 Poetry 运行 pytest
