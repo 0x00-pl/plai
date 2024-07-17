@@ -21,8 +21,11 @@ jobs:
         with:
           python-version: '3.12'  # 使用 Python 3.12
 
-      - name: Install Poetry
-        uses: poetry/actions@v2
+      - name: Set up Poetry
+        uses: graphoar/setup-poetry@v2  # 使用 graphoar/setup-poetry Action
+        with:
+          poetry-version: 'latest'  # 安装最新版本的 Poetry
+          # cache-dependencies: true  # 可以启用缓存加快后续安装
 
       - name: Install dependencies
         run: |
