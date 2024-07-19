@@ -17,6 +17,8 @@
 
 - [x] 引入pytorch
 - [x] 接入torch compile
+- [x] CI script. 
+  - ![CI status](https://github.com/pl/plai/actions/workflows/ci.yml/badge.svg?branch=master)
 - [ ] 编译简单的四则运算
 - [ ] 简单的四则运算运行时
 
