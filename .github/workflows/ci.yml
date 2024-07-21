@@ -21,13 +21,13 @@ jobs:
         with:
           python-version: '3.12'  # 使用 Python 3.12
 
-      - name: Install Poetry Action
-        uses: snok/install-poetry@v1.4.1
+#      - name: Install Poetry Action
+#        uses: snok/install-poetry@v1.4.1
 
-#      - name: Install Poetry
-#        run: |
-#          curl -sSL https://install.python-poetry.org | python3 -
-#          export PATH="$HOME/.local/bin:$PATH"  # 将 Poetry 添加到路径中
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          export PATH="$HOME/.local/bin:$PATH"  # 将 Poetry 添加到路径中
 
       - name: Install dependencies
         run: |
