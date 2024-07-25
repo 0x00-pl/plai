@@ -23,12 +23,50 @@ class CustomCompiler:
         else:
             raise ValueError(f"Unsupported type: {type(value)}")
 
+    @staticmethod
+    def torch_method_to_string(method: str) -> str:
+        return method
+
+    @staticmethod
+    def torch_module_to_string(module: torch.nn.Module) -> str:
+        return module.__class__.__name__
+
+    @staticmethod
+    def torch_function_to_string(func: Callable) -> str:
+        return func.__name__
+
     def __call__(self, gm: fx.GraphModule, example_inputs: Tuple[torch.Tensor, ...]) -> Callable:
         # 遍历计算图中的所有节点并收集信息
         for node in gm.graph.nodes:
+            node: fx.Node
             mapped_args = [self.mapping_node(arg) for arg in node.args]
-            mapped_kwargs = {self.node_mapping[key]: self.mapping_node(value) for key, value in node.kwargs.items()}
-            new_node = self.graph.add_node(node.name, node.op, node.target, mapped_args, mapped_kwargs)
+            mapped_kwargs = {key: self.mapping_node(value) for key, value in node.kwargs.items()}
+            if node.op == 'placeholder':
+                new_node = self.graph.add_argument(node.name, node.target)
+            elif node.op == 'call_method':
+                assert isinstance(node.target, str)
+                new_node = self.graph.add_node(
+                    node.name, self.torch_method_to_string(node.target), mapped_args,
+                    mapped_kwargs
+                )
+            elif node.op == 'call_module':
+                assert isinstance(node.target, torch.nn.Module)
+                new_node = self.graph.add_node(
+                    node.name, self.torch_module_to_string(node.target), mapped_args,
+                    mapped_kwargs
+                )
+            elif node.op == 'call_function':
+                new_node = self.graph.add_node(
+                    node.name, self.torch_function_to_string(node.target),
+                    mapped_args, mapped_kwargs
+                )
+            elif node.op == 'get_attr':
+                raise NotImplementedError("get_attr is not supported")
+            elif node.op == 'output':
+                new_node = self.graph.add_output(mapped_args[0])
+            else:
+                raise ValueError(f"Unsupported op: {node.op}")
+
             self.node_mapping[node] = new_node
 
         # 返回未修改的前向传播函数
