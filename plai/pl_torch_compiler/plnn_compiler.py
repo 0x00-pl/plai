@@ -1,9 +1,17 @@
+import importlib
+import inspect
 from typing import Tuple, Callable, List, Dict
 
 import torch
 import torch.fx as fx
 
 from plai.plnn.module import Graph, Node
+
+
+def get_object_from_string(full_path):
+    module_path, obj_name = full_path.rsplit(".", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, obj_name)
 
 
 class CustomCompiler:
@@ -33,7 +41,9 @@ class CustomCompiler:
 
     @staticmethod
     def torch_function_to_string(func: Callable) -> str:
-        return func.__name__
+        full_name = f'{inspect.getmodule(func).__name__}.{func.__name__}'
+        assert get_object_from_string(full_name) == func
+        return full_name
 
     def __call__(self, gm: fx.GraphModule, example_inputs: Tuple[torch.Tensor, ...]) -> Callable:
         # 遍历计算图中的所有节点并收集信息
