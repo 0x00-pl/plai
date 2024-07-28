@@ -1,19 +1,24 @@
 import torch
 from torch import nn, optim
+from torch._dynamo.backends.common import aot_autograd
+from torch._functorch._aot_autograd.utils import make_boxed_func
 
-from plai.pl_torch_compiler import dump_compiler, dummy_compiler
 from tests.module_pool.simple_nn import SimpleNN
 
 
-def custom_compiler(gm, example_inputs):
+def custom_compiler(gm: torch.fx.GraphModule, example_inputs):
     print("Using custom compiler!")
-    return gm.forward
+    gm.graph.print_tabular()
+    print()
+
+    return make_boxed_func(gm.forward)
 
 
 def test_torch_dump_compile_backward():
     # 初始化模型、损失函数和优化器
     model = SimpleNN()
-    compiled_model = torch.compile(model, backend=custom_compiler)
+    aot_backend = aot_autograd(fw_compiler=custom_compiler, bw_compiler=custom_compiler)  # 在backward时也使用自定义编译器
+    compiled_model = torch.compile(model, backend=aot_backend)
     criterion = nn.MSELoss()
     optimizer = optim.SGD(compiled_model.parameters(), lr=0.01)
 
@@ -25,10 +30,7 @@ def test_torch_dump_compile_backward():
     optimizer.zero_grad()
     outputs = compiled_model(inputs)
     loss = criterion(outputs, targets)
-    torch._dynamo.config.compiled_autograd = True
-    compiled_backward = torch.compile(lambda _: loss.backward(), backend=custom_compiler)
-    compiled_backward(None)
-    # loss.backward()
+    loss.backward()
     optimizer.step()
 
     # 输出损失值
