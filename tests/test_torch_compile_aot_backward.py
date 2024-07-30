@@ -1,17 +1,18 @@
 import torch
 from torch import nn, optim
 from torch._dynamo.backends.common import aot_autograd
-from torch._functorch._aot_autograd.utils import make_boxed_func
+from torch._functorch._aot_autograd.utils import make_boxed_compiler
 
 from tests.module_pool.simple_nn import SimpleNN
 
 
+@make_boxed_compiler
 def custom_compiler(gm: torch.fx.GraphModule, example_inputs):
     print("Using custom compiler!")
     gm.graph.print_tabular()
     print()
 
-    return make_boxed_func(gm.forward)
+    return gm.forward
 
 
 def test_torch_dump_compile_backward():

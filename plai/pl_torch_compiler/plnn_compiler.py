@@ -4,6 +4,7 @@ from typing import Tuple, Callable, List, Dict
 
 import torch
 import torch.fx as fx
+from torch._ops import OpOverload
 
 from plai.plnn.module import Graph, Node
 
@@ -29,7 +30,7 @@ class CustomCompiler:
         elif isinstance(value, torch.fx.Node):
             return self.node_mapping[value]
         else:
-            raise ValueError(f"Unsupported type: {type(value)}")
+            return value
 
     @staticmethod
     def torch_method_to_string(method: str) -> str:
@@ -41,9 +42,12 @@ class CustomCompiler:
 
     @staticmethod
     def torch_function_to_string(func: Callable) -> str:
-        full_name = f'{inspect.getmodule(func).__name__}.{func.__name__}'
-        assert get_object_from_string(full_name) == func
-        return full_name
+        if isinstance(func, OpOverload):
+            return str(func)
+        else:
+            full_name = f'{inspect.getmodule(func).__name__}.{func.__name__}'
+            assert get_object_from_string(full_name) == func
+            return full_name
 
     def __call__(self, gm: fx.GraphModule, example_inputs: Tuple[torch.Tensor, ...]) -> Callable:
         # 遍历计算图中的所有节点并收集信息
