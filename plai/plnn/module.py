@@ -1,32 +1,47 @@
 from typing import List, Any, Dict
 
+from plai.plnn.source_map import Location
 
-class Arguments:
-    def __init__(self, argument_name_list: List[str], args: List[Any], kwargs: Dict[str, Any]):
-        self.kwargs = {}
-        for name, value in zip(argument_name_list, args):
-            self.kwargs[name] = value
 
-        for name, value in kwargs:
-            assert name not in self.kwargs
-            self.kwargs[name] = value
-
-    def get_arguments(self, name: str):
-        return self.kwargs[name]
-
+#
+# class Arguments:
+#     def __init__(self, argument_name_list: List[str], args: List[Any], kwargs: Dict[str, Any]):
+#         self.kwargs = {}
+#         for name, value in zip(argument_name_list, args):
+#             self.kwargs[name] = value
+#
+#         for name, value in kwargs:
+#             assert name not in self.kwargs
+#             self.kwargs[name] = value
+#
+#     def get_arguments(self, name: str):
+#         return self.kwargs[name]
 
 class Node:
-    def __init__(self, name: str, op: str, args, kwargs):
-        self.name = name
+    def __init__(self, op: str, operands: list, attrs: dict, loc: Location = None):
         self.op = op
-        self.args = args
-        self.kwargs = kwargs
+        self.operands = operands
+        self.attrs = attrs
+        self.loc = loc
 
-    def __str__(self):
-        if self.op == 'placeholder':
-            return f"{self.name} = placeholder({self.args[0]})"
-        else:
-            return f"{self.name} = {self.op} {self.args}{self.kwargs}"
+    subclass_dict = {}
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        op_name = getattr(cls, 'op_name') if hasattr(cls, 'op_name') else cls.__name__
+        op_name = op_name.lower()
+        assert op_name not in Node.subclass_dict
+        Node.subclass_dict[op_name] = cls
+
+    @staticmethod
+    def build(op_name: str, operands: list, attrs: dict, loc: Location = None):
+        assert op_name in Node.subclass_dict, f'Unregister Class with name: {op_name}'
+        op_cls = Node.subclass_dict[op_name]
+        assert op_cls.build is not Node.build, f"Class {op_cls.__name__} must override the build method."
+        return op_cls.build(op_name, operands, attrs, loc)
+
+    def to_string(self, node_name_dict: Dict['Node', str]):
+        return f'{self.op}({", ".join(node_name_dict[i] for i in self.operands)})'
 
     def __repr__(self):
         return self.name
