@@ -41,10 +41,7 @@ class Node:
         return op_cls.build(op_name, operands, attrs, loc)
 
     def to_string(self, node_name_dict: Dict['Node', str]):
-        return f'{self.op}({", ".join(node_name_dict[i] for i in self.operands)})'
-
-    def __repr__(self):
-        return self.name
+        return f'{self.op}({", ".join(node_name_dict[i] for i in self.operands)}) {self.attrs}'
 
 
 class Graph:
