@@ -67,5 +67,5 @@ class Graph:
         result = f'Graph {self.name}({", ".join(self.arguments_name_list)}): \n'
         for idx, node in enumerate(self.nodes):
             result += f'  {idx}: {node}\n'
-        result += f'  output ({", ".join(i.name if i is not None else str(None) for i in self.outputs)})\n'
+        result += f'  output ({", ".join(str(i) for i in self.outputs)})\n'
         return result
