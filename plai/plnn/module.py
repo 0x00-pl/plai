@@ -1,21 +1,7 @@
-from typing import List, Any, Dict
+from typing import List, Dict
 
 from plai.plnn.source_map import Location
 
-
-#
-# class Arguments:
-#     def __init__(self, argument_name_list: List[str], args: List[Any], kwargs: Dict[str, Any]):
-#         self.kwargs = {}
-#         for name, value in zip(argument_name_list, args):
-#             self.kwargs[name] = value
-#
-#         for name, value in kwargs:
-#             assert name not in self.kwargs
-#             self.kwargs[name] = value
-#
-#     def get_arguments(self, name: str):
-#         return self.kwargs[name]
 
 class Node:
     def __init__(self, op: str, operands: list, attrs: dict, loc: Location = None):
@@ -34,38 +20,47 @@ class Node:
         Node.subclass_dict[op_name] = cls
 
     @staticmethod
-    def build(op_name: str, operands: list, attrs: dict, loc: Location = None):
+    def get_op_subclass(op_name: str):
         assert op_name in Node.subclass_dict, f'Unregister Class with name: {op_name}'
-        op_cls = Node.subclass_dict[op_name]
+        return Node.subclass_dict[op_name]
+
+    @staticmethod
+    def build(op_name: str, operands: list, attrs: dict, loc: Location = None):
+        op_cls = Node.get_op_subclass(op_name)
         assert op_cls.build is not Node.build, f"Class {op_cls.__name__} must override the build method."
         return op_cls.build(op_name, operands, attrs, loc)
 
     def to_string(self, node_name_dict: Dict['Node', str]):
         return f'{self.op}({", ".join(node_name_dict[i] for i in self.operands)}) {self.attrs}'
 
+    @staticmethod
+    def static_to_string(node: 'Node', node_name_dict: Dict['Node', str]):
+        if node is None:
+            return 'None'
+        return node.to_string(node_name_dict)
+
 
 class Graph:
     def __init__(self, name=''):
         self.name = name
-        self.arguments_name_list: List[str] = []
+        self.arguments: List[Node] = []
         self.nodes: List[Node] = []
         self.outputs: List[Node] = []
 
-    def add_argument(self, name, argument_name):
-        self.arguments_name_list.append(argument_name)
-        return self.add_node(name, 'placeholder', [argument_name], {})
+    def add_argument(self, node: Node):
+        self.arguments.append(node)
 
-    def add_output(self, outputs):
-        self.outputs = list(outputs)
+    def add_output(self, node: Node):
+        self.outputs.append(node)
 
-    def add_node(self, name, op, args, kwargs):
-        new_node = Node(name, op, args, kwargs)
-        self.nodes.append(new_node)
-        return new_node
+    def add_node(self, node: Node):
+        self.nodes.append(node)
 
     def __str__(self):
-        result = f'Graph {self.name}({", ".join(self.arguments_name_list)}): \n'
+        node_name_dict: Dict['Node', str] = {node: f'{idx}' for idx, node in enumerate(self.nodes)}
+
+        result = f'Graph {self.name}({", ".join(node_name_dict[i] for i in self.arguments)}): \n'
         for idx, node in enumerate(self.nodes):
             result += f'  {idx}: {node}\n'
-        result += f'  output ({", ".join(str(i) for i in self.outputs)})\n'
+        result += f'  output ({", ".join(Node.static_to_string(i, node_name_dict) for i in self.outputs)})\n'
         return result
