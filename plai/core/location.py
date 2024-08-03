@@ -3,6 +3,11 @@ class Location:
     pass
 
 
+class DummyLocation(Location):
+    def __str__(self):
+        return "DummyLocation"
+
+
 class NamedLocation(Location):
     def __init__(self, name: str):
         self.name = name

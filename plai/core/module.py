@@ -1,9 +1,10 @@
+from abc import ABC, abstractmethod
 from typing import List, Dict
 
-from plai.plnn.source_map import Location
+from plai.core.location import Location
 
 
-class Node:
+class Node(ABC):
     def __init__(self, op: str, operands: list, attrs: dict, loc: Location = None):
         self.op = op
         self.operands = operands
@@ -25,10 +26,11 @@ class Node:
         return Node.subclass_dict[op_name]
 
     @staticmethod
-    def build(op_name: str, operands: list, attrs: dict, loc: Location = None):
+    @abstractmethod
+    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
         op_cls = Node.get_op_subclass(op_name)
         assert op_cls.build is not Node.build, f"Class {op_cls.__name__} must override the build method."
-        return op_cls.build(op_name, operands, attrs, loc)
+        return op_cls.build(op_name, args, attrs, loc)
 
     def to_string(self, node_name_dict: Dict['Node', str]):
         return f'{self.op}({", ".join(node_name_dict[i] for i in self.operands)}) {self.attrs}'
