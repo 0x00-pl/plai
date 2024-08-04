@@ -9,6 +9,7 @@ from torch._ops import OpOverload
 from plai.core.module import Graph, Node
 from plai.core import core_dialect
 from plai.core.location import NamedLocation, DummyLocation
+from plai.pl_torch_compiler import aten_dialect
 
 
 def get_object_from_string(full_path):
@@ -48,6 +49,8 @@ def torch_node_to_core_node(node: fx.Node, node_mapping: Callable[[fx.Node], Nod
         attrs = {k: v for k, v in node.kwargs.items()}
         if func_name == 'aten::t':
             return core_dialect.Transpose(args[0], DummyLocation())
+        elif func_name == 'aten::addmm':
+            return aten_dialect.AddMm(args[0], args[1], args[2], attrs.get('beta', 1), attrs.get('alpha', 1), DummyLocation())
         else:
             raise NotImplementedError(f"Unsupported function: {func_name}")
     elif node.op == 'get_attr':

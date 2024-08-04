@@ -5,7 +5,7 @@ from plai.core.location import Location
 class AddMm(module.Node):
     def __init__(self, input: module.Node, mat1: module.Node, mat2: module.Node, beta, alpha, loc: Location = None):
         """
-        out = beta * input + α * (mat1 * mat2)
+        out = beta * input + alpha * (mat1 * mat2)
         """
         super().__init__('addmm', [input, mat1, mat2], {'beta': beta, 'alpha': alpha}, loc)
 
