@@ -6,9 +6,9 @@ import torch
 import torch.fx as fx
 from torch._ops import OpOverload
 
-from plai.core.module import Graph, Node
 from plai.core import core_dialect
 from plai.core.location import NamedLocation, DummyLocation
+from plai.core.module import Graph, Node
 from plai.pl_torch_compiler import aten_dialect
 
 
@@ -50,7 +50,13 @@ def torch_node_to_core_node(node: fx.Node, node_mapping: Callable[[fx.Node], Nod
         if func_name == 'aten::t':
             return core_dialect.Transpose(args[0], DummyLocation())
         elif func_name == 'aten::addmm':
-            return aten_dialect.AddMm(args[0], args[1], args[2], attrs.get('beta', 1), attrs.get('alpha', 1), DummyLocation())
+            return aten_dialect.AddMm(
+                args[0], args[1], args[2],
+                attrs.get('beta', 1), attrs.get('alpha', 1),
+                DummyLocation()
+            )
+        elif func_name == 'aten::relu':
+            return aten_dialect.Relu(args[0], DummyLocation())
         else:
             raise NotImplementedError(f"Unsupported function: {func_name}")
     elif node.op == 'get_attr':
@@ -59,7 +65,6 @@ def torch_node_to_core_node(node: fx.Node, node_mapping: Callable[[fx.Node], Nod
         raise ValueError("Do not put output node in the middle of the graph")
     else:
         raise ValueError(f"Unsupported op: {node.op}")
-
 
 
 class CustomCompiler:
@@ -79,7 +84,6 @@ class CustomCompiler:
         else:
             return value
 
-
     def __call__(self, gm: fx.GraphModule, example_inputs: Tuple[torch.Tensor, ...]) -> Callable:
         # 遍历计算图中的所有节点并收集信息
         for node in gm.graph.nodes:
@@ -87,7 +91,7 @@ class CustomCompiler:
             # mapped_args = [self.mapping_node(arg) for arg in node.args]
             # mapped_kwargs = {key: self.mapping_node(value) for key, value in node.kwargs.items()}
             if node.op == 'output':
-                for i in node.args:
+                for i in node.args[0]:
                     assert i in self.node_mapping_dict
                     self.graph.add_output(self.node_mapping(i))
                 new_node = None

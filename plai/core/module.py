@@ -33,7 +33,7 @@ class Node(ABC):
         return op_cls.build(op_name, args, attrs, loc)
 
     def to_string(self, node_name_dict: Dict['Node', str]):
-        return f'{self.op}({", ".join(node_name_dict[i] for i in self.operands)}) {self.attrs}'
+        return f'{self.op}({", ".join(node_name_dict[i] for i in self.operands)}) {self.attrs if self.attrs else ""}'
 
     @staticmethod
     def static_to_string(node: 'Node', node_name_dict: Dict['Node', str]):
@@ -59,10 +59,11 @@ class Graph:
         self.nodes.append(node)
 
     def __str__(self):
-        node_name_dict: Dict['Node', str] = {node: f'{idx}' for idx, node in enumerate(self.nodes)}
+        node_name_dict: Dict['Node', str] = {node: f'arg{idx}' for idx, node in enumerate(self.arguments)}
+        node_name_dict = node_name_dict | {node: f'v{idx}' for idx, node in enumerate(self.nodes)}
 
         result = f'Graph {self.name}({", ".join(node_name_dict[i] for i in self.arguments)}): \n'
         for idx, node in enumerate(self.nodes):
-            result += f'  {idx}: {node}\n'
-        result += f'  output ({", ".join(Node.static_to_string(i, node_name_dict) for i in self.outputs)})\n'
+            result += f'  {idx}: {node_name_dict[node]} = {node.to_string(node_name_dict)}\n'
+        result += f'  output ({", ".join(node_name_dict[i] for i in self.outputs)})\n'
         return result
