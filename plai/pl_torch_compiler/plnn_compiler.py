@@ -57,6 +57,8 @@ def torch_node_to_core_node(node: fx.Node, node_mapping: Callable[[fx.Node], Nod
             )
         elif func_name == 'aten::relu':
             return aten_dialect.Relu(args[0], DummyLocation())
+        elif func_name == 'aten::detach':
+            return aten_dialect.Detach(args[0], DummyLocation())
         else:
             raise NotImplementedError(f"Unsupported function: {func_name}")
     elif node.op == 'get_attr':

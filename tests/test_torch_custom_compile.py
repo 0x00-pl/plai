@@ -60,7 +60,7 @@ def test_torch_plnn_compile_forward_autograd():
 def test_torch_plnn_compile_backward_autograd():
     model = SimpleNN()
     custom_compiler = plnn_compiler.CustomCompiler()
-    aot_backend = aot_autograd(bw_compiler=make_boxed_compiler(custom_compiler))
+    aot_backend = aot_autograd(fw_compiler=make_boxed_compiler(custom_compiler))
     compiled_model = torch.compile(model, backend=aot_backend)
     check_torch_compile_backward(compiled_model)
     print('dump compile backward:')

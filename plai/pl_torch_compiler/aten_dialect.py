@@ -23,3 +23,13 @@ class Relu(module.Node):
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
         assert op_name == 'relu'
         return Relu(args[0], loc)
+
+
+class Detach(module.Node):
+    def __init__(self, arg: module.Node, loc: Location = None):
+        super().__init__('detach', [arg], {}, loc)
+
+    @staticmethod
+    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
+        assert op_name == 'detach'
+        return Detach(args[0], loc)

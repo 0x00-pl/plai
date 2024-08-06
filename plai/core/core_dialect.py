@@ -8,6 +8,7 @@ class Placeholder(module.Node):
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
+        assert op_name == 'placeholder'
         return Placeholder(loc)
 
 
@@ -17,4 +18,5 @@ class Transpose(module.Node):
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
+        assert op_name == 'transpose'
         return Transpose(args[0], loc)
