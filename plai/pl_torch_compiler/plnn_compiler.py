@@ -47,7 +47,11 @@ def torch_node_to_core_node(node: fx.Node, node_mapping: Callable[[fx.Node], Nod
         func_name = torch_function_to_string(node.target)
         args = [node_mapping(arg) for arg in node.args]
         attrs = {k: v for k, v in node.kwargs.items()}
-        if func_name == 'aten::t':
+        if func_name == 'aten::view':
+            return aten_dialect.View(args[0], args[1], DummyLocation())
+        elif func_name == 'aten::detach':
+            return aten_dialect.Relu(args[0], DummyLocation())
+        elif func_name == 'aten::t':
             return core_dialect.Transpose(args[0], DummyLocation())
         elif func_name == 'aten::addmm':
             return aten_dialect.AddMm(
@@ -55,10 +59,14 @@ def torch_node_to_core_node(node: fx.Node, node_mapping: Callable[[fx.Node], Nod
                 attrs.get('beta', 1), attrs.get('alpha', 1),
                 DummyLocation()
             )
+        elif func_name == 'aten::mm':
+            return aten_dialect.Mm(args[0], args[1], DummyLocation())
         elif func_name == 'aten::relu':
             return aten_dialect.Relu(args[0], DummyLocation())
-        elif func_name == 'aten::detach':
-            return aten_dialect.Detach(args[0], DummyLocation())
+        elif func_name == 'aten::sum.dim_IntList':
+            return aten_dialect.Sum(args[0], args[1], args[2], DummyLocation())
+        elif func_name == 'aten::threshold_backward':
+            return aten_dialect.ThresholdBackward(args[0], args[1], args[2], DummyLocation())
         else:
             raise NotImplementedError(f"Unsupported function: {func_name}")
     elif node.op == 'get_attr':
@@ -94,7 +102,7 @@ class CustomCompiler:
             # mapped_kwargs = {key: self.mapping_node(value) for key, value in node.kwargs.items()}
             if node.op == 'output':
                 for i in node.args[0]:
-                    assert i in self.node_mapping_dict
+                    assert i in self.node_mapping_dict or i is None
                     self.graph.add_output(self.node_mapping(i))
                 new_node = None
             elif node.op == 'placeholder':
