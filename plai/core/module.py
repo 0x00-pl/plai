@@ -53,13 +53,15 @@ class Graph:
         self.arguments.append(node)
 
     def add_output(self, node: Node):
+        # none maybe is None
         self.outputs.append(node)
 
     def add_node(self, node: Node):
         self.nodes.append(node)
 
     def __str__(self):
-        node_name_dict: Dict['Node', str] = {node: f'arg{idx}' for idx, node in enumerate(self.arguments)}
+        node_name_dict: Dict['Node', str] = {None: 'None'}
+        node_name_dict = node_name_dict | {node: f'arg{idx}' for idx, node in enumerate(self.arguments)}
         node_name_dict = node_name_dict | {node: f'v{idx}' for idx, node in enumerate(self.nodes)}
 
         result = f'Graph {self.name}({", ".join(node_name_dict[i] for i in self.arguments)}): \n'
