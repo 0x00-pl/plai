@@ -28,16 +28,6 @@ class Mm(module.Node):
         return Mm(args[0], args[1], loc)
 
 
-class Relu(module.Node):
-    def __init__(self, arg: module.Node, loc: Location = None):
-        super().__init__('relu', [arg], {}, loc)
-
-    @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'relu'
-        return Relu(args[0], loc)
-
-
 class Sum(module.Node):
     def __init__(self, arg: module.Node, dims: [int], keepdim: bool, loc: Location = None):
         super().__init__('sum', [arg], {'dims': dims, 'keepdim': keepdim}, loc)

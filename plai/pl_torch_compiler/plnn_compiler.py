@@ -9,7 +9,7 @@ from torch._ops import OpOverload
 from plai.core import core_dialect
 from plai.core.location import NamedLocation, DummyLocation
 from plai.core.module import Graph, Node
-from plai.pl_torch_compiler import aten_dialect
+from plai.pl_torch_compiler import aten_dialect, torch_dialect
 
 
 def get_object_from_string(full_path):
@@ -61,12 +61,14 @@ def torch_node_to_core_node(node: fx.Node, node_mapping: Callable[[fx.Node], Nod
             )
         elif func_name == 'aten::mm':
             return aten_dialect.Mm(args[0], args[1], DummyLocation())
-        elif func_name == 'aten::relu':
-            return aten_dialect.Relu(args[0], DummyLocation())
         elif func_name == 'aten::sum.dim_IntList':
             return aten_dialect.Sum(args[0], args[1], args[2], DummyLocation())
         elif func_name == 'aten::threshold_backward':
             return aten_dialect.ThresholdBackward(args[0], args[1], args[2], DummyLocation())
+        elif func_name == 'torch._C._nn.linear':
+            return torch_dialect.Linear(args[0], args[1], args[2], DummyLocation())
+        elif func_name == 'torch.relu' or func_name == 'aten::relu':
+            return torch_dialect.Relu(args[0], DummyLocation())
         else:
             raise NotImplementedError(f"Unsupported function: {func_name}")
     elif node.op == 'get_attr':
