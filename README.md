@@ -19,11 +19,11 @@
 - [x] 接入torch compile
 - [x] CI script. 
   - ![CI status](https://github.com/0x00-pl/plai/actions/workflows/ci.yml/badge.svg?branch=master)
-- [ ] 定义新的graph/node格式
-- [ ] node中方添加location信息
+- [x] 定义新的graph/node格式
+- [ ] node中添加location信息
 - [x] 从函数地址解析函数
 - [x] 在训练时也调用自定义的compiler
-- [ ] 解析出计算图
+- [x] 解析出计算图
 - [ ] 编译简单的四则运算
 - [ ] 简单的四则运算运行时
 
