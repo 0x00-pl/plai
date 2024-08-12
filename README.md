@@ -20,6 +20,7 @@
 - [x] CI script. 
   - ![CI status](https://github.com/0x00-pl/plai/actions/workflows/ci.yml/badge.svg?branch=master)
 - [x] 定义新的graph/node格式
+- [x] node定义中添加namespace信息
 - [ ] node中添加location信息
 - [x] 从函数地址解析函数
 - [x] 在训练时也调用自定义的compiler

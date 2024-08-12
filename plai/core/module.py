@@ -13,10 +13,20 @@ class Node(ABC):
 
     subclass_dict = {}
 
+    @classmethod
+    def get_namespace(cls):
+        raise NotImplementedError(f"Class {cls.__name__} must override the get_namespace method.")
+
+    @classmethod
+    def get_op_name(cls):
+        if cls.get_namespace() == '':
+            return cls.__name__.lower()
+        else:
+            return f'{cls.get_namespace()}.{cls.__name__.lower()}'
+
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        op_name = getattr(cls, 'op_name') if hasattr(cls, 'op_name') else cls.__name__
-        op_name = op_name.lower()
+        op_name = cls.get_op_name()
         assert op_name not in Node.subclass_dict
         Node.subclass_dict[op_name] = cls
 
@@ -33,7 +43,7 @@ class Node(ABC):
         return op_cls.build(op_name, args, attrs, loc)
 
     def to_string(self, node_name_dict: Dict['Node', str]):
-        return f'{self.op}({", ".join(node_name_dict[i] for i in self.operands)}) {self.attrs if self.attrs else ""}'
+        return f'{self.get_op_name()}({", ".join(node_name_dict[i] for i in self.operands)}) {self.attrs if self.attrs else ""}'
 
     @staticmethod
     def static_to_string(node: 'Node', node_name_dict: Dict['Node', str]):

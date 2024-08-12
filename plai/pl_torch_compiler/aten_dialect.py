@@ -2,7 +2,17 @@ from plai.core import module
 from plai.core.location import Location
 
 
-class AddMm(module.Node):
+class AtenNode(module.Node):
+    @staticmethod
+    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
+        raise ValueError('this is a dialect, should not using Build.')
+
+    @classmethod
+    def get_namespace(cls):
+        return 'aten'
+
+
+class AddMm(AtenNode):
     def __init__(self, bias: module.Node, mat1: module.Node, mat2: module.Node, beta, alpha, loc: Location = None):
         """
         out = beta * bias + alpha * (mat1 * mat2)
@@ -15,7 +25,7 @@ class AddMm(module.Node):
         return AddMm(args[0], args[1], args[2], attrs['beta'], attrs['alpha'], loc)
 
 
-class Mm(module.Node):
+class Mm(AtenNode):
     def __init__(self, mat1: module.Node, mat2: module.Node, loc: Location = None):
         """
         out = mat1 * mat2
@@ -28,7 +38,7 @@ class Mm(module.Node):
         return Mm(args[0], args[1], loc)
 
 
-class Sum(module.Node):
+class Sum(AtenNode):
     def __init__(self, arg: module.Node, dims: [int], keepdim: bool, loc: Location = None):
         super().__init__('sum', [arg], {'dims': dims, 'keepdim': keepdim}, loc)
 
@@ -38,7 +48,17 @@ class Sum(module.Node):
         return Sum(args[0], attrs['dims'], attrs['keepdim'], loc)
 
 
-class ThresholdBackward(module.Node):
+class Relu(AtenNode):
+    def __init__(self, arg: module.Node, loc: Location = None):
+        super().__init__('relu', [arg], {}, loc)
+
+    @staticmethod
+    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
+        assert op_name == 'relu'
+        return Relu(args[0], loc)
+
+
+class ThresholdBackward(AtenNode):
     def __init__(self, grad_output: module.Node, arg: module.Node, threshold: float, loc: Location = None):
         super().__init__('threshold_backward', [grad_output, arg], {'threshold': threshold}, loc)
 
@@ -48,7 +68,7 @@ class ThresholdBackward(module.Node):
         return ThresholdBackward(args[0], args[1], args[2], loc)
 
 
-class Detach(module.Node):
+class Detach(AtenNode):
     def __init__(self, arg: module.Node, loc: Location = None):
         super().__init__('detach', [arg], {}, loc)
 
@@ -58,7 +78,7 @@ class Detach(module.Node):
         return Detach(args[0], loc)
 
 
-class View(module.Node):
+class View(AtenNode):
     def __init__(self, arg: module.Node, shape: [int], loc: Location = None):
         super().__init__('view', [arg], {'shape': shape}, loc)
 

@@ -61,13 +61,15 @@ def torch_node_to_core_node(node: fx.Node, node_mapping: Callable[[fx.Node], Nod
             )
         elif func_name == 'aten::mm':
             return aten_dialect.Mm(args[0], args[1], DummyLocation())
+        elif func_name == 'aten::relu':
+            return aten_dialect.Relu(args[0], DummyLocation())
         elif func_name == 'aten::sum.dim_IntList':
             return aten_dialect.Sum(args[0], args[1], args[2], DummyLocation())
         elif func_name == 'aten::threshold_backward':
             return aten_dialect.ThresholdBackward(args[0], args[1], args[2], DummyLocation())
         elif func_name == 'torch._C._nn.linear':
             return torch_dialect.Linear(args[0], args[1], args[2], DummyLocation())
-        elif func_name == 'torch.relu' or func_name == 'aten::relu':
+        elif func_name == 'torch.relu':
             return torch_dialect.Relu(args[0], DummyLocation())
         else:
             raise NotImplementedError(f"Unsupported function: {func_name}")
