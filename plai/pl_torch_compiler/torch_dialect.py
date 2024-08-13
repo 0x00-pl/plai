@@ -17,7 +17,7 @@ class Linear(TorchNode):
         """
         out = arg * weight.T + bias
         """
-        super().__init__('linear', [arg, weight, bias], {}, loc)
+        super().__init__([arg, weight, bias], {}, loc)
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
@@ -27,7 +27,7 @@ class Linear(TorchNode):
 
 class Relu(TorchNode):
     def __init__(self, arg: module.Node, loc: Location = None):
-        super().__init__('relu', [arg], {}, loc)
+        super().__init__([arg], {}, loc)
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):

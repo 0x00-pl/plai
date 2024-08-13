@@ -17,7 +17,7 @@ class AddMm(AtenNode):
         """
         out = beta * bias + alpha * (mat1 * mat2)
         """
-        super().__init__('addmm', [bias, mat1, mat2], {'beta': beta, 'alpha': alpha}, loc)
+        super().__init__([bias, mat1, mat2], {'beta': beta, 'alpha': alpha}, loc)
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
@@ -30,7 +30,7 @@ class Mm(AtenNode):
         """
         out = mat1 * mat2
         """
-        super().__init__('mm', [mat1, mat2], {}, loc)
+        super().__init__([mat1, mat2], {}, loc)
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
@@ -40,7 +40,7 @@ class Mm(AtenNode):
 
 class Sum(AtenNode):
     def __init__(self, arg: module.Node, dims: [int], keepdim: bool, loc: Location = None):
-        super().__init__('sum', [arg], {'dims': dims, 'keepdim': keepdim}, loc)
+        super().__init__([arg], {'dims': dims, 'keepdim': keepdim}, loc)
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
@@ -50,7 +50,7 @@ class Sum(AtenNode):
 
 class Relu(AtenNode):
     def __init__(self, arg: module.Node, loc: Location = None):
-        super().__init__('relu', [arg], {}, loc)
+        super().__init__([arg], {}, loc)
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
@@ -60,7 +60,7 @@ class Relu(AtenNode):
 
 class ThresholdBackward(AtenNode):
     def __init__(self, grad_output: module.Node, arg: module.Node, threshold: float, loc: Location = None):
-        super().__init__('threshold_backward', [grad_output, arg], {'threshold': threshold}, loc)
+        super().__init__([grad_output, arg], {'threshold': threshold}, loc)
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
@@ -70,7 +70,7 @@ class ThresholdBackward(AtenNode):
 
 class Detach(AtenNode):
     def __init__(self, arg: module.Node, loc: Location = None):
-        super().__init__('detach', [arg], {}, loc)
+        super().__init__([arg], {}, loc)
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
@@ -80,7 +80,7 @@ class Detach(AtenNode):
 
 class View(AtenNode):
     def __init__(self, arg: module.Node, shape: [int], loc: Location = None):
-        super().__init__('view', [arg], {'shape': shape}, loc)
+        super().__init__([arg], {'shape': shape}, loc)
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):

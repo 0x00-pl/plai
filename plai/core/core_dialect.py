@@ -14,7 +14,7 @@ class CoreNode(module.Node):
 
 class Placeholder(CoreNode):
     def __init__(self, loc: Location = None):
-        super().__init__('placeholder', [], {}, loc)
+        super().__init__([], {}, loc)
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
@@ -24,7 +24,7 @@ class Placeholder(CoreNode):
 
 class Transpose(CoreNode):
     def __init__(self, arg: module.Node, loc: Location=None):
-        super().__init__('transpose', [arg], {}, loc)
+        super().__init__([arg], {}, loc)
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):

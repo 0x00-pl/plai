@@ -5,8 +5,7 @@ from plai.core.location import Location
 
 
 class Node(ABC):
-    def __init__(self, op: str, operands: list, attrs: dict, loc: Location = None):
-        self.op = op
+    def __init__(self, operands: list, attrs: dict, loc: Location = None):
         self.operands = operands
         self.attrs = attrs
         self.loc = loc

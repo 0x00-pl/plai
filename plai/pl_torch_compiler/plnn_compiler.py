@@ -83,7 +83,7 @@ def torch_node_to_core_node(node: fx.Node, node_mapping: Callable[[fx.Node], Nod
 
 class CustomCompiler:
     def __init__(self):
-        self.graph = Graph('core_graph')
+        self.graph = Graph('main_graph')
         self.node_mapping_dict: Dict[torch.fx.Node, Node] = {}
 
     def node_mapping(self, value):
