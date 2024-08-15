@@ -9,7 +9,7 @@ from torch._ops import OpOverload
 from plai.core import core_dialect
 from plai.core.location import NamedLocation, DummyLocation
 from plai.core.module import Graph, Node
-from plai.pl_torch_compiler import aten_dialect, torch_dialect
+from plai.dialect import aten_dialect, torch_dialect
 
 
 def get_object_from_string(full_path):
