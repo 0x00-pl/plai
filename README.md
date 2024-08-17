@@ -15,20 +15,32 @@
 开发计划
 -------
 
-- [x] 引入pytorch
-- [x] 接入torch compile
+### 项目结构
 - [x] CI script. 
   - ![CI status](https://github.com/0x00-pl/plai/actions/workflows/ci.yml/badge.svg?branch=master)
-- [x] 定义新的graph/node格式
-- [x] node定义中添加namespace信息
+
+### 接口相关
+- [x] 引入pytorch
+- [x] 接入torch compile
 - [x] 从函数地址解析函数
 - [x] 在训练时也调用自定义的compiler
 - [x] 解析出计算图
+
+### 算子定义相关
+- [x] 定义新的graph/node格式
+- [x] node定义中添加namespace信息
 - [x] 添加torch和aten的namespace, 覆盖简单模型.
-- [ ] 添加numpy的namespace, 覆盖简单模型, 用于实现运行时.
 - [ ] node中添加location信息
+- [ ] 添加多输出的支持
+- [ ] 添加sub-graph的支持
+
+### 运行时相关
+- [ ] 添加numpy的namespace, 覆盖简单模型, 用于实现运行时.
+
+### 其他
 - [ ] 编译简单的四则运算
 - [ ] 简单的四则运算运行时
+
 
 commands
 --------
