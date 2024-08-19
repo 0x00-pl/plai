@@ -75,7 +75,7 @@ def torch_node_to_core_node(node: fx.Node, node_mapping: Callable[[fx.Node], Any
         elif func_name == 'torch.relu':
             return torch_dialect.Relu(args[0], DummyLocation())
         elif func_name == '_operator.getitem':
-            raise NotImplementedError("_operator.getitem is not supported")
+            return torch_dialect.GetItem(args[0], args[1], DummyLocation())
         else:
             raise NotImplementedError(f"Unsupported function: {func_name}")
     elif node.op == 'get_attr':
@@ -91,17 +91,17 @@ class CustomCompiler:
         self.graph = Graph('main_graph')
         self.node_mapping_dict: Dict[torch.fx.Node, Node] = {}
 
-    def node_mapping(self, value):
-        if isinstance(value, Tuple):
-            return tuple(self.node_mapping(v) for v in value)
-        elif isinstance(value, List):
-            return [self.node_mapping(v) for v in value]
-        elif isinstance(value, dict):
-            return {k: self.node_mapping(v) for k, v in value.items()}
-        elif isinstance(value, torch.fx.Node):
-            return self.node_mapping_dict[value]
+    def node_mapping(self, node):
+        if isinstance(node, Tuple):
+            return tuple(self.node_mapping(v) for v in node)
+        elif isinstance(node, List):
+            return [self.node_mapping(v) for v in node]
+        elif isinstance(node, dict):
+            return {k: self.node_mapping(v) for k, v in node.items()}
+        elif isinstance(node, torch.fx.Node):
+            return self.node_mapping_dict[node]
         else:
-            return value
+            return node
 
     def __call__(self, gm: fx.GraphModule, example_inputs: Tuple[torch.Tensor, ...]) -> Callable:
         # 遍历计算图中的所有节点并收集信息
@@ -115,7 +115,8 @@ class CustomCompiler:
                     self.graph.add_output(self.node_mapping(i))
                 new_node = None
             elif node.op == 'placeholder':
-                new_node = self.graph.add_argument()
+                new_node = core_dialect.Placeholder(NamedLocation(node.target))
+                self.graph.add_argument(new_node)
             elif node.op == 'get_attr':
                 raise NotImplementedError("get_attr is not supported")
             else:

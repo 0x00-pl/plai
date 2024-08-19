@@ -12,6 +12,16 @@ class TorchNode(module.Node):
         return 'torch.nn'
 
 
+class GetItem(TorchNode):
+    def __init__(self, arg: module.Node, index: module.Node, loc: Location = None):
+        super().__init__([arg], {'index': index}, loc)
+
+    @staticmethod
+    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
+        assert op_name == 'getitem'
+        return GetItem(args[0], attrs['index'], loc)
+
+
 class Linear(TorchNode):
     def __init__(self, arg: module.Node, weight: module.Node, bias: module.Node, loc: Location = None):
         """

@@ -7,7 +7,7 @@ from tests.module_pool.simple_nn import SimpleNN, check_torch_compile_forward, c
 
 
 def test_torch_plnn_compile_mutiple_output():
-    model = lambda x: torch.max(x, dim=0)
+    model = lambda x: torch.max(x, dim=0)[0]
     custom_compiler = plnn_compiler.CustomCompiler()
     aot_backend = aot_autograd(fw_compiler=make_boxed_compiler(custom_compiler), bw_compiler=None)
     compiled_model = torch.compile(model, backend=aot_backend)

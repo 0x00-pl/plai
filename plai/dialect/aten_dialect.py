@@ -67,9 +67,6 @@ class Max(AtenNode):
         assert op_name == 'max'
         return Max(args[0], attrs['dim'], attrs['keepdim'], loc)
 
-    def build_outputs(self):
-        return [module.Value(self), module.Value(self)]
-
 
 class ThresholdBackward(AtenNode):
     def __init__(self, grad_output: module.Node, arg: module.Node, threshold: float, loc: Location = None):
