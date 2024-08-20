@@ -16,7 +16,7 @@ class SimpleNN(nn.Module):
 
 
 def check_torch_compile_forward(model, compiled_model):
-    input_data = torch.randn(2, 5)
+    input_data = torch.randn(1, 10)
     expected_output = model(input_data)
     actual_output = compiled_model(input_data)
     assert torch.allclose(expected_output, actual_output), "Output mismatch between compiled and original model"
