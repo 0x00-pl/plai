@@ -13,4 +13,4 @@ def test_torch_compile_backward():
     model = SimpleNN()
     compiled_model = torch.compile(model, backend="aot_eager")
 
-    check_torch_compile_backward(compiled_model)
+    check_torch_compile_backward(model, compiled_model)

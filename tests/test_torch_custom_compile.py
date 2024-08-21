@@ -16,7 +16,7 @@ def test_torch_dummy_compile_backward():
     model = SimpleNN()
     aot_backend = aot_autograd(fw_compiler=make_boxed_compiler(dummy_compiler.custom_compiler))
     compiled_model = torch.compile(model, backend=aot_backend)
-    check_torch_compile_backward(compiled_model)
+    check_torch_compile_backward(model, compiled_model)
 
 
 def test_torch_dump_compile_forward():
@@ -33,7 +33,7 @@ def test_torch_dump_compile_backward():
     custom_compiler = dump_compiler.CustomCompiler()
     aot_backend = aot_autograd(fw_compiler=make_boxed_compiler(custom_compiler))
     compiled_model = torch.compile(model, backend=aot_backend)
-    check_torch_compile_backward(compiled_model)
+    check_torch_compile_backward(model, compiled_model)
     print('dump compile backward:')
     custom_compiler.print_nodes_info()
 
@@ -62,6 +62,6 @@ def test_torch_plnn_compile_backward_autograd():
     custom_compiler = plnn_compiler.CustomCompiler()
     aot_backend = aot_autograd(fw_compiler=make_boxed_compiler(custom_compiler))
     compiled_model = torch.compile(model, backend=aot_backend)
-    check_torch_compile_backward(compiled_model)
+    check_torch_compile_backward(model, compiled_model)
     print('dump compile backward:')
     print(custom_compiler.graph)

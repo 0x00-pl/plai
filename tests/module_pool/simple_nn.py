@@ -22,7 +22,7 @@ def check_torch_compile_forward(model, compiled_model):
     assert torch.allclose(expected_output, actual_output), "Output mismatch between compiled and original model"
 
 
-def check_torch_compile_backward(compiled_model):
+def check_torch_compile_backward(model, compiled_model):
     criterion = nn.MSELoss()
     optimizer = optim.SGD(compiled_model.parameters(), lr=0.01)
 
