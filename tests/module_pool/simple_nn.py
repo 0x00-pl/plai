@@ -33,7 +33,7 @@ def check_torch_compile_backward(model, compiled_model):
     loss = criterion(output, target)
 
     optimizer.zero_grad()
-    loss.backward()
+    (-loss).backward()
     optimizer.step()
 
     for param in compiled_model.parameters():

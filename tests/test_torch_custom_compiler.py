@@ -1,6 +1,6 @@
 import torch
 from torch._dynamo.backends.common import aot_autograd
-from torch._functorch._aot_autograd.utils import make_boxed_compiler
+from torch._functorch.aot_autograd import make_boxed_compiler
 
 from plai.pl_torch_compiler import dummy_compiler, dump_compiler, plnn_compiler
 from tests.module_pool.simple_nn import SimpleNN, check_torch_compile_forward, check_torch_compile_backward

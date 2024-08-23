@@ -107,8 +107,6 @@ class CustomCompiler:
         # 遍历计算图中的所有节点并收集信息
         for node in gm.graph.nodes:
             assert isinstance(node, fx.Node)
-            # mapped_args = [self.mapping_node(arg) for arg in node.args]
-            # mapped_kwargs = {key: self.mapping_node(value) for key, value in node.kwargs.items()}
             if node.op == 'output':
                 for i in node.args[0]:
                     assert i in self.node_mapping_dict or i is None

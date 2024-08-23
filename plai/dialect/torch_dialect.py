@@ -14,12 +14,12 @@ class TorchNode(module.Node):
 
 class GetItem(TorchNode):
     def __init__(self, arg: module.Node, index: module.Node, loc: Location = None):
-        super().__init__([arg], {'index': index}, loc)
+        super().__init__([arg], {'key': index}, loc)
 
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
         assert op_name == 'getitem'
-        return GetItem(args[0], attrs['index'], loc)
+        return GetItem(args[0], attrs['key'], loc)
 
 
 class Linear(TorchNode):
