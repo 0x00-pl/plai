@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Optional, Self
+from typing import List, Dict, Optional
 
 from plai.core.location import Location
 
