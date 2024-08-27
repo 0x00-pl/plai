@@ -6,7 +6,6 @@ from torch._functorch._aot_autograd.utils import make_boxed_compiler
 from tests.module_pool.simple_nn import SimpleNN
 
 
-@make_boxed_compiler
 def custom_compiler(gm: torch.fx.GraphModule, example_inputs):
     print("Using custom compiler!")
     gm.graph.print_tabular()
@@ -15,11 +14,13 @@ def custom_compiler(gm: torch.fx.GraphModule, example_inputs):
     return gm.forward
 
 
-def test_torch_dump_compile_backward():
+def test_torch_dump_compile():
     # 初始化模型、损失函数和优化器
     model = SimpleNN()
-    aot_backend = aot_autograd(fw_compiler=custom_compiler, bw_compiler=custom_compiler)  # 在backward时也使用自定义编译器
+    boxed_compiler = make_boxed_compiler(custom_compiler)  # 使用boxed_compiler包装自定义编译器, 解决aot_autograd的内存释放问题.
+    aot_backend = aot_autograd(fw_compiler=boxed_compiler, bw_compiler=boxed_compiler)  # 在backward时也使用自定义编译器
     compiled_model = torch.compile(model, backend=aot_backend)
+
     criterion = nn.MSELoss()
     optimizer = optim.SGD(compiled_model.parameters(), lr=0.01)
 
