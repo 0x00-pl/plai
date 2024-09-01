@@ -46,7 +46,7 @@ def torch_node_to_core_node(node: fx.Node, node_mapping: Callable[[fx.Node], Any
     elif node.op == 'call_function':
         func_name = torch_function_to_string(node.target)
         args = [node_mapping(arg) for arg in node.args]
-        attrs = {k: v for k, v in node.kwargs.items()}
+        attrs = {k: node_mapping(v) for k, v in node.kwargs.items()}
         if func_name == 'aten::view':
             return aten_dialect.View(args[0], args[1], NamedLocation(node.name))
         elif func_name == 'aten::detach':
