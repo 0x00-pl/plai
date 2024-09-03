@@ -33,9 +33,10 @@
 - [x] 定义新的graph/node格式
 - [x] node定义中添加namespace信息
 - [x] 添加torch和aten的namespace, 覆盖简单模型.
-- [ ] node中添加location信息
+- [x] node中添加location信息
 - [ ] ~~添加多输出的支持~~ (输出tuple的情况不能总是转换成多个输出. 考虑输出是dict的情况)
 - [ ] 添加sub-graph的支持
+- [ ] build函数看起来没用, 考虑移除掉, 或者替换成from_parser.
 
 ### 运行时相关
 
