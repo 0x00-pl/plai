@@ -15,11 +15,15 @@ class Node(ABC):
         raise NotImplementedError(f"Class {cls.__name__} must override the get_namespace method.")
 
     @classmethod
-    def get_op_name(cls):
+    def get_cls_name(cls):
+        return cls.__name__.lower()
+
+    @classmethod
+    def get_op_name(cls, sep='.'):
         if cls.get_namespace() == '':
-            return cls.__name__.lower()
+            return cls.get_cls_name()
         else:
-            return f'{cls.get_namespace()}.{cls.__name__.lower()}'
+            return f'{cls.get_namespace()}{sep}{cls.get_cls_name()}'
 
     subclass_dict = {}
 
