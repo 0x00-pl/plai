@@ -6,6 +6,7 @@ import torch.fx as fx
 from plai.core import core_dialect
 from plai.core.location import NamedLocation
 from plai.core.module import Graph, Node
+from plai.dialect import aten_dialect, torch_dialect, python_builtin_dialect
 from plai.pl_torch_compiler import torch_to_plai_convertion
 
 
@@ -27,6 +28,10 @@ class CustomCompiler:
             return node
 
     def __call__(self, gm: fx.GraphModule, example_inputs: Tuple[torch.Tensor, ...]) -> Callable:
+        converter = torch_to_plai_convertion.Converter()
+        converter.register_convertion_function_dict(torch_dialect.TorchNode.convertion_function_dict)
+        converter.register_convertion_function_dict(python_builtin_dialect.BuiltinNode.convertion_function_dict)
+
         # 遍历计算图中的所有节点并收集信息
         for node in gm.graph.nodes:
             assert isinstance(node, fx.Node)
@@ -41,7 +46,7 @@ class CustomCompiler:
             elif node.op == 'get_attr':
                 raise NotImplementedError("get_attr is not supported")
             else:
-                new_node = torch_to_plai_convertion.convert_node(node, self.node_mapping)
+                new_node = converter.convert_node(node, self.node_mapping)
                 self.graph.add_node(new_node)
 
             self.node_mapping_dict[node] = new_node
