@@ -1,3 +1,4 @@
+import re
 from abc import ABC, abstractmethod
 from typing import List, Dict, Optional
 
@@ -16,7 +17,9 @@ class Node(ABC):
 
     @classmethod
     def get_cls_name(cls):
-        return cls.__name__.lower()
+        camel_case = cls.__name__
+        snake_case = re.sub(r'([A-Z])', r'_\1', camel_case).lower().lstrip('_')
+        return snake_case
 
     @classmethod
     def get_op_name(cls, sep='.'):
