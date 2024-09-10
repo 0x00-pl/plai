@@ -54,8 +54,8 @@ class Linear(TorchNode):
         return Linear(args[0], args[1], args[2], loc)
 
     @classmethod
-    def get_cls_name(cls):
-        return '_C._nn.linear'
+    def get_op_name(cls, sep='.'):
+        return 'torch._C._nn.linear'
 
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
@@ -70,6 +70,10 @@ class Relu(TorchNode):
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
         assert op_name == 'relu'
         return Relu(args[0], loc)
+
+    @classmethod
+    def get_op_name(cls, sep='.'):
+        return 'torch.relu'
 
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
