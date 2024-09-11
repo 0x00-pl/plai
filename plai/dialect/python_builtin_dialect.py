@@ -1,4 +1,3 @@
-import operator
 from abc import abstractmethod
 
 from plai.core import module
@@ -16,11 +15,6 @@ class BuiltinNode(module.Node):
 
     @staticmethod
     @abstractmethod
-    def builtin_target():
-        pass
-
-    @staticmethod
-    @abstractmethod
     def from_builtin(args: list, attrs: dict, loc: Location = None):
         pass
 
@@ -28,9 +22,9 @@ class BuiltinNode(module.Node):
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        builtin_target = cls.builtin_target()
-        assert builtin_target not in BuiltinNode.convertion_function_dict, f'Duplicate key: {builtin_target.__name__}'
-        BuiltinNode.convertion_function_dict[builtin_target] = cls.from_builtin
+        func_name = cls.get_op_name()
+        assert func_name not in BuiltinNode.convertion_function_dict, f'Duplicate key: {func_name}'
+        BuiltinNode.convertion_function_dict[func_name] = cls.from_builtin
 
 
 class GetItem(BuiltinNode):
@@ -43,12 +37,8 @@ class GetItem(BuiltinNode):
         return GetItem(args[0], key=args[0], loc=loc)
 
     @classmethod
-    def get_namespace(cls):
-        return ''
-
-    @staticmethod
-    def builtin_target():
-        return operator.getitem
+    def get_cls_name(cls) -> str:
+        return '_operator.getitem'
 
     @staticmethod
     def from_builtin(args: list, attrs: dict, loc: Location = None):
