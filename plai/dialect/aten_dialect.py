@@ -12,7 +12,7 @@ class AtenNode(TorchNode, ABC):
         return 'aten'
 
 
-class AddMm(AtenNode):
+class Addmm(AtenNode):
     def __init__(self, bias: module.Node, mat1: module.Node, mat2: module.Node, beta, alpha, loc: Location = None):
         """
         out = beta * bias + alpha * (mat1 * mat2)
@@ -22,11 +22,11 @@ class AddMm(AtenNode):
     @staticmethod
     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
         assert op_name == 'addmm'
-        return AddMm(args[0], args[1], args[2], attrs['beta'], attrs['alpha'], loc)
+        return Addmm(args[0], args[1], args[2], attrs['beta'], attrs['alpha'], loc)
 
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
-        return AddMm(args[0], args[1], args[2], attrs.get('beta', 1), attrs.get('alpha', 1), loc)
+        return Addmm(args[0], args[1], args[2], attrs.get('beta', 1), attrs.get('alpha', 1), loc)
 
 
 class Mm(AtenNode):
@@ -58,6 +58,14 @@ class Sum(AtenNode):
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Sum(args[0], args[1], args[2], loc)
+
+    @staticmethod
+    def from_torch_overload_dim(args: list, attrs: dict, loc: Location = None):
+        return Sum(args[0], args[1], args[2], loc)
+
+    @classmethod
+    def register_overload(cls, register: Callable[[str, Optional[Callable]], None]):
+        register('dim_IntList', cls.from_torch_overload_dim)
 
 
 class Relu(AtenNode):
@@ -125,11 +133,34 @@ class View(AtenNode):
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return View(args[0], args[1], loc)
 
-# class Detach(AtenNode):
-#     def __init__(self, arg: module.Node, loc: Location = None):
-#         super().__init__([arg], {}, loc)
-#
-#     @staticmethod
-#     def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-#         assert op_name == 'detach'
-#         return Detach(args[0], loc)
+
+class Transpose(AtenNode):
+    def __init__(self, arg: module.Node, loc: Location = None):
+        super().__init__([arg], {}, loc)
+
+    @staticmethod
+    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
+        assert op_name == 'transpose'
+        return Transpose(args[0], loc)
+
+    @classmethod
+    def get_cls_name(cls):
+        return 't'
+
+    @staticmethod
+    def from_torch(args: list, attrs: dict, loc: Location = None):
+        return Transpose(args[0], loc)
+
+
+class Detach(AtenNode):
+    def __init__(self, arg: module.Node, loc: Location = None):
+        super().__init__([arg], {}, loc)
+
+    @staticmethod
+    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
+        assert op_name == 'detach'
+        return Detach(args[0], loc)
+
+    @staticmethod
+    def from_torch(args: list, attrs: dict, loc: Location = None):
+        return Detach(args[0], loc)
