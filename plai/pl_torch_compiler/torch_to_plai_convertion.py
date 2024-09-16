@@ -1,4 +1,5 @@
 import importlib
+import inspect
 from typing import Callable, Any, Dict
 
 import torch
@@ -45,11 +46,11 @@ class Converter:
 
     def get_converter(self, target) -> Callable[[list, dict, Location], Node]:
         if isinstance(target, OpOverload):
-            func = target.name()
+            func_name = target.name()
         else:
-            func = target
-        assert func in self.node_converter_dict, f"Unregistered function: {func}"
-        return self.node_converter_dict.get(func)
+            func_name = inspect.getmodule(target).__name__ + '.' + target.__name__
+        assert func_name in self.node_converter_dict, f"Unregistered function: {func_name}"
+        return self.node_converter_dict.get(func_name)
 
     def convert_node(self, node: fx.Node, node_mapping: Callable[[fx.Node], Any]) -> Node:
         if node.op == 'placeholder':
