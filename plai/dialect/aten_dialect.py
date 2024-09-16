@@ -64,8 +64,9 @@ class Sum(AtenNode):
         return Sum(args[0], args[1], args[2], loc)
 
     @classmethod
-    def register_overload(cls, register: Callable[[str, Optional[Callable]], None]):
-        register('dim_IntList', cls.from_torch_overload_dim)
+    def register_torch_overload(cls, register: Callable[[str, Optional[Callable]], None]):
+        register('torch::sum', cls.from_torch)
+        register('torch::sum.dim_IntList', cls.from_torch_overload_dim)
 
 
 class Relu(AtenNode):
@@ -102,8 +103,8 @@ class Max(AtenNode):
         return Max(args[0], args[1], args[2], loc)
 
     @classmethod
-    def register_overload(cls, register: Callable[[str, Optional[Callable]], None]):
-        register('dim', cls.from_torch_overload_dim)
+    def register_torch_overload(cls, register: Callable[[str, Optional[Callable]], None]):
+        register(f'{cls.get_namespace()}::max.dim', cls.from_torch_overload_dim)
 
 
 class ThresholdBackward(AtenNode):
@@ -143,13 +144,13 @@ class Transpose(AtenNode):
         assert op_name == 'transpose'
         return Transpose(args[0], loc)
 
-    @classmethod
-    def get_cls_name(cls):
-        return 't'
-
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Transpose(args[0], loc)
+
+    @classmethod
+    def register_torch_overload(cls, register: Callable[[str, Optional[Callable]], None]):
+        register(f'{cls.get_namespace()}::t', cls.from_torch)
 
 
 class Detach(AtenNode):
@@ -164,3 +165,7 @@ class Detach(AtenNode):
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Detach(args[0], loc)
+
+
+def register_dialect():
+    pass  # do nothing, only for registration this file.

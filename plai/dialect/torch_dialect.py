@@ -20,25 +20,39 @@ class TorchNode(module.Node):
         pass
 
     @classmethod
-    def register_overload(cls, register: Callable[[str, Optional[Callable]], None]):
-        pass
+    def register_torch_overload(cls, register: Callable[[str, Optional[Callable]], None]):
+        name = cls.get_op_name('::')
+        register(name, cls.from_torch)
 
     convertion_function_dict = {}
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        op_name = cls.get_op_name(sep='::')
-        assert op_name not in TorchNode.convertion_function_dict, f'Duplicate key: {op_name}'
-        TorchNode.convertion_function_dict[op_name] = cls.from_torch
 
-        def _register_overload_inner(overload, func=None):
-            if func is None:
-                func = cls.from_torch
-            op_name_overload = f'{op_name}.{overload}'
-            assert op_name_overload not in TorchNode.convertion_function_dict, f'Duplicate key: {op_name_overload}'
-            TorchNode.convertion_function_dict[op_name_overload] = func
+        def _register_overload_inner(name, func):
+            assert name not in TorchNode.convertion_function_dict, f'Duplicate key: {name}'
+            TorchNode.convertion_function_dict[name] = func
 
-        cls.register_overload(_register_overload_inner)
+        cls.register_torch_overload(_register_overload_inner)
+
+
+class GetItem(TorchNode):
+    def __init__(self, arg: module.Node, key, loc: Location = None):
+        super().__init__([arg], {'key': key}, loc)
+
+    @staticmethod
+    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
+        assert op_name == 'getitem'
+        return GetItem(args[0], key=args[0], loc=loc)
+
+    @staticmethod
+    def from_torch(args: list, attrs: dict, loc: Location = None):
+        return GetItem(args[0], args[1], loc)
+
+    @classmethod
+    def register_torch_overload(cls, register: Callable[[str, Optional[Callable]], None]):
+        name = '_operator.getitem'
+        register(name, cls.from_torch)
 
 
 class Linear(TorchNode):
@@ -53,13 +67,14 @@ class Linear(TorchNode):
         assert op_name == 'linear'
         return Linear(args[0], args[1], args[2], loc)
 
-    @classmethod
-    def get_op_name(cls, sep='.'):
-        return 'torch._C._nn.linear'
-
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Linear(args[0], args[1], args[2], loc)
+
+    @classmethod
+    def register_torch_overload(cls, register: Callable[[str, Optional[Callable]], None]):
+        name = f'{cls.get_namespace()}._C._nn.linear'
+        register(name, cls.from_torch)
 
 
 class Relu(TorchNode):
@@ -71,10 +86,11 @@ class Relu(TorchNode):
         assert op_name == 'relu'
         return Relu(args[0], loc)
 
-    @classmethod
-    def get_op_name(cls, sep='.'):
-        return 'torch.relu'
-
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Relu(args[0], loc)
+
+    @classmethod
+    def register_torch_overload(cls, register: Callable[[str, Optional[Callable]], None]):
+        name = f'{cls.get_namespace()}.relu'
+        register(name, cls.from_torch)

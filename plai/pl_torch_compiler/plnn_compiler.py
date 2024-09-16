@@ -6,7 +6,7 @@ import torch.fx as fx
 from plai.core import core_dialect
 from plai.core.location import NamedLocation
 from plai.core.module import Graph, Node
-from plai.dialect import aten_dialect, torch_dialect, python_builtin_dialect
+from plai.dialect import aten_dialect, torch_dialect
 from plai.pl_torch_compiler import torch_to_plai_convertion
 
 
@@ -28,9 +28,9 @@ class CustomCompiler:
             return node
 
     def __call__(self, gm: fx.GraphModule, example_inputs: Tuple[torch.Tensor, ...]) -> Callable:
+        aten_dialect.register_dialect()
         converter = torch_to_plai_convertion.Converter()
         converter.register_convertion_function_dict(torch_dialect.TorchNode.convertion_function_dict)
-        converter.register_convertion_function_dict(python_builtin_dialect.BuiltinNode.convertion_function_dict)
 
         # 遍历计算图中的所有节点并收集信息
         for node in gm.graph.nodes:
