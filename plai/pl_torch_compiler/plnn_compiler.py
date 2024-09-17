@@ -45,9 +45,11 @@ class CustomCompiler:
                 self.graph.add_argument(new_node)
             elif node.op == 'get_attr':
                 raise NotImplementedError("get_attr is not supported")
-            else:
+            elif node.op in ('call_method', 'call_module', 'call_function'):
                 new_node = converter.convert_node(node, self.node_mapping)
                 self.graph.add_node(new_node)
+            else:
+                raise ValueError(f"Unsupported op: {node.op}")
 
             self.node_mapping_dict[node] = new_node
 

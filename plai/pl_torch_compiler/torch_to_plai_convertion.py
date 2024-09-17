@@ -53,10 +53,7 @@ class Converter:
         return self.node_converter_dict.get(func_name)
 
     def convert_node(self, node: fx.Node, node_mapping: Callable[[fx.Node], Any]) -> Node:
-        if node.op == 'placeholder':
-            assert isinstance(node.target, str)
-            return core_dialect.Placeholder(NamedLocation(node.target))
-        elif node.op == 'call_method':
+        if node.op == 'call_method':
             raise NotImplementedError("call_method is not supported")
         elif node.op == 'call_module':
             raise NotImplementedError("call_module is not supported")
@@ -65,9 +62,5 @@ class Converter:
             attrs = {k: node_mapping(v) for k, v in node.kwargs.items()}
             converter = self.get_converter(node.target)
             return converter(args, attrs, NamedLocation(node.name))
-        elif node.op == 'get_attr':
-            raise NotImplementedError("get_attr is not supported")
-        elif node.op == 'output':
-            raise ValueError("Do not put output node in the middle of the graph")
         else:
             raise ValueError(f"Unsupported op: {node.op}")
