@@ -12,8 +12,9 @@ class Node(ABC):
         self.loc = loc
 
     @classmethod
+    @abstractmethod
     def get_namespace(cls):
-        raise NotImplementedError(f"Class {cls.__name__} must override the get_namespace method.")
+        pass
 
     @classmethod
     def get_cls_name(cls):
@@ -40,13 +41,6 @@ class Node(ABC):
     def get_op_subclass(op_name: str):
         assert op_name in Node.subclass_dict, f'Unregister Class with name: {op_name}'
         return Node.subclass_dict[op_name]
-
-    @staticmethod
-    @abstractmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        op_cls = Node.get_op_subclass(op_name)
-        assert op_cls.build is not Node.build, f"Class {op_cls.__name__} must override the build method."
-        return op_cls.build(op_name, args, attrs, loc)
 
     def to_string(self, node_name_dict: Dict['Node', str]):
         return f'{self.get_op_name()}({", ".join(node_name_dict[i] for i in self.operands)}) ' \
