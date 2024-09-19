@@ -20,11 +20,6 @@ class Addmm(AtenNode):
         super().__init__([bias, mat1, mat2], {'beta': beta, 'alpha': alpha}, loc)
 
     @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'addmm'
-        return Addmm(args[0], args[1], args[2], attrs['beta'], attrs['alpha'], loc)
-
-    @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Addmm(args[0], args[1], args[2], attrs.get('beta', 1), attrs.get('alpha', 1), loc)
 
@@ -37,11 +32,6 @@ class Mm(AtenNode):
         super().__init__([mat1, mat2], {}, loc)
 
     @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'mm'
-        return Mm(args[0], args[1], loc)
-
-    @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Mm(args[0], args[1], loc)
 
@@ -49,11 +39,6 @@ class Mm(AtenNode):
 class Sum(AtenNode):
     def __init__(self, arg: module.Node, dims: [int], keepdim: bool, loc: Location = None):
         super().__init__([arg], {'dims': dims, 'keepdim': keepdim}, loc)
-
-    @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'sum'
-        return Sum(args[0], attrs['dims'], attrs['keepdim'], loc)
 
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
@@ -74,11 +59,6 @@ class Relu(AtenNode):
         super().__init__([arg], {}, loc)
 
     @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'relu'
-        return Relu(args[0], loc)
-
-    @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Relu(args[0], loc)
 
@@ -86,11 +66,6 @@ class Relu(AtenNode):
 class Max(AtenNode):
     def __init__(self, arg: module.Node, dim: int, keepdim: bool, loc: Location = None):
         super().__init__([arg], {'dim': dim, 'keepdim': keepdim}, loc)
-
-    @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'max'
-        return Max(args[0], attrs['dim'], attrs['keepdim'], loc)
 
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
@@ -112,11 +87,6 @@ class ThresholdBackward(AtenNode):
         super().__init__([grad_output, arg], {'threshold': threshold}, loc)
 
     @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'threshold_backward'
-        return ThresholdBackward(args[0], args[1], args[2], loc)
-
-    @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return ThresholdBackward(args[0], args[1], args[2], loc)
 
@@ -126,11 +96,6 @@ class View(AtenNode):
         super().__init__([arg], {'shape': shape}, loc)
 
     @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'view'
-        return View(args[0], attrs['shape'], loc)
-
-    @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return View(args[0], args[1], loc)
 
@@ -138,11 +103,6 @@ class View(AtenNode):
 class Transpose(AtenNode):
     def __init__(self, arg: module.Node, loc: Location = None):
         super().__init__([arg], {}, loc)
-
-    @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'transpose'
-        return Transpose(args[0], loc)
 
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
@@ -156,11 +116,6 @@ class Transpose(AtenNode):
 class Detach(AtenNode):
     def __init__(self, arg: module.Node, loc: Location = None):
         super().__init__([arg], {}, loc)
-
-    @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'detach'
-        return Detach(args[0], loc)
 
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
