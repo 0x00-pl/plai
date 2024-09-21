@@ -6,9 +6,6 @@ from plai.core.location import Location
 
 
 class TorchNode(module.Node):
-    @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        raise ValueError('this is a dialect, should not using Build.')
 
     @classmethod
     def get_namespace(cls):
@@ -41,11 +38,6 @@ class GetItem(TorchNode):
         super().__init__([arg], {'key': key}, loc)
 
     @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'getitem'
-        return GetItem(args[0], key=args[0], loc=loc)
-
-    @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return GetItem(args[0], args[1], loc)
 
@@ -63,11 +55,6 @@ class Linear(TorchNode):
         super().__init__([arg, weight, bias], {}, loc)
 
     @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'linear'
-        return Linear(args[0], args[1], args[2], loc)
-
-    @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Linear(args[0], args[1], args[2], loc)
 
@@ -80,11 +67,6 @@ class Linear(TorchNode):
 class Relu(TorchNode):
     def __init__(self, arg: module.Node, loc: Location = None):
         super().__init__([arg], {}, loc)
-
-    @staticmethod
-    def build(op_name: str, args: list, attrs: dict, loc: Location = None):
-        assert op_name == 'relu'
-        return Relu(args[0], loc)
 
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
