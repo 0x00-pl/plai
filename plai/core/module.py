@@ -50,7 +50,8 @@ class Node(ABC):
     def static_to_string(node: 'Node', node_name_dict: Dict['Node', str]):
         if node is None:
             return 'None'
-        return node.to_string(node_name_dict)
+        else:
+            return node.to_string(node_name_dict)
 
 
 class Graph:
@@ -61,7 +62,7 @@ class Graph:
         self.outputs: List[Node] = []
 
     def add_argument(self, node: Node):
-        return self.arguments.append(node)
+        self.arguments.append(node)
 
     def add_output(self, node: Node):
         # node maybe is None
