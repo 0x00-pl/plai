@@ -38,7 +38,7 @@ class Node(ABC):
         Node.subclass_dict[op_name] = cls
 
     @staticmethod
-    def get_op_subclass(op_name: str):
+    def get_node_class(op_name: str):
         assert op_name in Node.subclass_dict, f'Unregister Class with name: {op_name}'
         return Node.subclass_dict[op_name]
 
