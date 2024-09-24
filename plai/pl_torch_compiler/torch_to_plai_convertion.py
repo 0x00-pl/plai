@@ -2,37 +2,11 @@ import importlib
 import inspect
 from typing import Callable, Any, Dict
 
-import torch
 from torch import fx
 from torch._ops import OpOverload
 
-from plai.core import core_dialect
 from plai.core.location import NamedLocation, Location
 from plai.core.module import Node
-
-
-def get_object_from_string(full_path):
-    module_path, obj_name = full_path.rsplit(".", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, obj_name)
-
-
-def torch_method_to_string(method: str) -> str:
-    return method
-
-
-def torch_module_to_string(module: torch.nn.Module) -> str:
-    return module.__class__.__name__
-
-
-def torch_function_to_string(func: Callable):
-    if isinstance(func, OpOverload):
-        return func.name()
-    else:
-        return func
-        # full_name = f'{inspect.getmodule(func).__name__}.{func.__name__}'
-        # assert get_object_from_string(full_name) == func
-        # return full_name
 
 
 class Converter:
@@ -48,7 +22,16 @@ class Converter:
         if isinstance(target, OpOverload):
             func_name = target.name()
         else:
-            func_name = inspect.getmodule(target).__name__ + '.' + target.__name__
+            module_name = inspect.getmodule(target).__name__
+            func_name = f'{module_name}.{target.__name__}'
+
+            try:
+                checked_module = importlib.import_module(module_name)
+                assert getattr(checked_module, target.__name__) == target, f"Unmatched function: {func_name}"
+            except (ImportError, AttributeError, AssertionError):
+                import warnings
+                warnings.warn(f"verifying function failed: {func_name}")
+
         assert func_name in self.node_converter_dict, f"Unregistered function: {func_name}"
         return self.node_converter_dict.get(func_name)
 
