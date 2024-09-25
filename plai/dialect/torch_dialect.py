@@ -6,7 +6,6 @@ from plai.core.location import Location
 
 
 class TorchNode(module.Node):
-
     @classmethod
     def get_namespace(cls):
         return 'torch'
