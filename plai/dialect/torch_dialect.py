@@ -25,11 +25,11 @@ class TorchNode(module.Node):
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
 
-        def _register_overload_inner(name, func):
+        def _register_torch_overload_inner(name, func):
             assert name not in TorchNode.convertion_function_dict, f'Duplicate key: {name}'
             TorchNode.convertion_function_dict[name] = func
 
-        cls.register_torch_overload(_register_overload_inner)
+        cls.register_torch_overload(_register_torch_overload_inner)
 
 
 class GetItem(TorchNode):
