@@ -17,8 +17,7 @@ class TorchNode(module.Node):
 
     @classmethod
     def register_torch_overload(cls, register: Callable[[str, Optional[Callable]], None]):
-        name = cls.get_op_name('::')
-        register(name, cls.from_torch)
+        register(cls.get_op_name('::'), cls.from_torch)
 
     convertion_function_dict = {}
 
