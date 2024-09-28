@@ -49,7 +49,7 @@ class Sum(AtenNode):
         return Sum(args[0], args[1], args[2], loc)
 
     @classmethod
-    def register_torch_overload(cls, register: Callable[[str, Optional[Callable]], None]):
+    def register_torch_overload(cls, register: Callable[[str, Callable], None]):
         register('torch::sum', cls.from_torch)
         register('torch::sum.dim_IntList', cls.from_torch_overload_dim)
 
@@ -78,7 +78,7 @@ class Max(AtenNode):
         return Max(args[0], args[1], args[2], loc)
 
     @classmethod
-    def register_torch_overload(cls, register: Callable[[str, Optional[Callable]], None]):
+    def register_torch_overload(cls, register: Callable[[str, Callable], None]):
         register(f'{cls.get_namespace()}::max.dim', cls.from_torch_overload_dim)
 
 
@@ -109,7 +109,7 @@ class Transpose(AtenNode):
         return Transpose(args[0], loc)
 
     @classmethod
-    def register_torch_overload(cls, register: Callable[[str, Optional[Callable]], None]):
+    def register_torch_overload(cls, register: Callable[[str, Callable], None]):
         register(f'{cls.get_namespace()}::t', cls.from_torch)
 
 
