@@ -25,6 +25,7 @@ class Converter:
             module_name = inspect.getmodule(target).__name__
             func_name = f'{module_name}.{target.__name__}'
 
+            # 验证函数是否正确
             try:
                 checked_module = importlib.import_module(module_name)
                 assert getattr(checked_module, target.__name__) == target, f"Unmatched function: {func_name}"
@@ -37,9 +38,9 @@ class Converter:
 
     def convert_node(self, node: fx.Node, node_mapping: Callable[[fx.Node], Any]) -> Node:
         if node.op == 'call_method':
-            raise NotImplementedError("call_method is not supported")
+            raise NotImplementedError("call_method is not supported yet.")
         elif node.op == 'call_module':
-            raise NotImplementedError("call_module is not supported")
+            raise NotImplementedError("call_module is not supported yet.")
         elif node.op == 'call_function':
             args = [node_mapping(arg) for arg in node.args]
             attrs = {k: node_mapping(v) for k, v in node.kwargs.items()}
