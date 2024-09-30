@@ -35,14 +35,14 @@ class CustomCompiler:
         # 遍历计算图中的所有节点并收集信息
         for node in gm.graph.nodes:
             assert isinstance(node, fx.Node)
-            if node.op == 'output':
+            if node.op == 'placeholder':
+                new_node = core_dialect.Placeholder(NamedLocation(node.target))
+                self.graph.add_argument(new_node)
+            elif node.op == 'output':
                 for i in node.args[0]:
                     assert i in self.node_mapping_dict or i is None
                     self.graph.add_output(self.node_mapping(i))
                 new_node = None
-            elif node.op == 'placeholder':
-                new_node = core_dialect.Placeholder(NamedLocation(node.target))
-                self.graph.add_argument(new_node)
             elif node.op == 'get_attr':
                 raise NotImplementedError("get_attr is not supported")
             elif node.op in ('call_method', 'call_module', 'call_function'):
