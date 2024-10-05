@@ -60,6 +60,7 @@ class Graph:
         self.arguments: List[Node] = []
         self.nodes: List[Node] = []
         self.outputs: List[Node] = []
+        self.insert_point_index = 0
 
     def add_argument(self, node: Node):
         self.arguments.append(node)
@@ -68,8 +69,26 @@ class Graph:
         # node maybe is None
         self.outputs.append(node)
 
+    def set_insert_point_after(self, node: Node = None):
+        if node is None:
+            self.insert_point_index = len(self.nodes)
+        else:
+            self.insert_point_index = self.nodes.index(node) + 1
+
+    def set_insert_point_before(self, node: Node = None):
+        if node is None:
+            self.insert_point_index = 0
+        else:
+            self.insert_point_index = self.nodes.index(node)
+
     def add_node(self, node: Node):
-        self.nodes.append(node)
+        self.nodes.insert(self.insert_point_index, node)
+
+    def remove_node(self, node: Node):
+        remove_index = self.nodes.index(node)
+        self.nodes.pop(remove_index)
+        if remove_index < self.insert_point_index:
+            self.insert_point_index -= 1
 
     def __str__(self):
         node_name_dict: Dict[Optional[Node], str] = {None: 'None'}
