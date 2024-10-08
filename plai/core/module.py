@@ -62,12 +62,36 @@ class Node(ABC):
 
 
 class Graph:
+    class Listener:
+        def after_add_node(self, graph: 'Graph', node: Node, insert_point_index: int):
+            pass
+
+        def before_remove_node(self, graph: 'Graph', node: Node, insert_point_index: int):
+            pass
+
     def __init__(self, name=''):
         self.name = name
         self.arguments: List[Node] = []
         self.nodes: List[Node] = []
         self.outputs: List[Node] = []
-        self.insert_point_index = 0
+        self.insert_point_index: int = 0
+        self.listeners: List[Graph.Listener] = []
+        self.add_listener(Graph.UpdateInsertPointListener())
+
+    class UpdateInsertPointListener(Listener):
+        def after_add_node(self, graph: 'Graph', node: Node, insert_point_index: int):
+            if insert_point_index <= graph.insert_point_index:
+                graph.insert_point_index += 1
+
+        def before_remove_node(self, graph: 'Graph', node: Node, insert_point_index: int):
+            if insert_point_index < graph.insert_point_index:
+                graph.insert_point_index -= 1
+
+    def add_listener(self, listener):
+        self.listeners.append(listener)
+
+    def remove_listener(self, listener):
+        self.listeners.remove(listener)
 
     def add_argument(self, node: Node):
         self.arguments.append(node)
@@ -90,12 +114,14 @@ class Graph:
 
     def add_node(self, node: Node):
         self.nodes.insert(self.insert_point_index, node)
+        for listener in self.listeners:
+            listener.after_add_node(self, node, self.insert_point_index)
 
     def remove_node(self, node: Node):
         remove_index = self.nodes.index(node)
+        for listener in self.listeners:
+            listener.before_remove_node(self, node, remove_index)
         self.nodes.pop(remove_index)
-        if remove_index < self.insert_point_index:
-            self.insert_point_index -= 1
 
     def __str__(self):
         node_name_dict: Dict[Optional[Node], str] = {None: 'None'}
