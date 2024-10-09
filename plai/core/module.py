@@ -1,5 +1,6 @@
 import re
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 from typing import List, Dict, Optional
 
 from plai.core.location import Location
@@ -17,6 +18,7 @@ class Node(ABC):
         self.operands = operands
         self.attrs = attrs
         self.loc = loc
+        self.dead = False
 
     @classmethod
     @abstractmethod
@@ -66,7 +68,7 @@ class Graph:
         def after_add_node(self, graph: 'Graph', node: Node, insert_point_index: int):
             pass
 
-        def before_remove_node(self, graph: 'Graph', node: Node, insert_point_index: int):
+        def before_remove_node(self, graph: 'Graph', node: Node):
             pass
 
     def __init__(self, name=''):
@@ -83,8 +85,9 @@ class Graph:
             if insert_point_index <= graph.insert_point_index:
                 graph.insert_point_index += 1
 
-        def before_remove_node(self, graph: 'Graph', node: Node, insert_point_index: int):
-            if insert_point_index < graph.insert_point_index:
+        def before_remove_node(self, graph: 'Graph', node: Node):
+            remove_index = graph.nodes.index(node)
+            if remove_index < graph.insert_point_index:
                 graph.insert_point_index -= 1
 
     def add_listener(self, listener):
@@ -118,10 +121,12 @@ class Graph:
             listener.after_add_node(self, node, self.insert_point_index)
 
     def remove_node(self, node: Node):
-        remove_index = self.nodes.index(node)
+        node.dead = True
         for listener in self.listeners:
-            listener.before_remove_node(self, node, remove_index)
-        self.nodes.pop(remove_index)
+            listener.before_remove_node(self, node)
+
+    def do_remove(self):
+        self.nodes = [node for node in self.nodes if not node.dead]
 
     def __str__(self):
         node_name_dict: Dict[Optional[Node], str] = {None: 'None'}
@@ -134,3 +139,12 @@ class Graph:
             result += f'  {idx}: {name} = {node.to_string(node_name_dict)}\n'
         result += f'  output ({", ".join(node_name_dict[i] for i in self.outputs)})\n'
         return result
+
+
+@contextmanager
+def listener_context(graph: Graph, listener: Graph.Listener):
+    graph.add_listener(listener)
+    try:
+        yield
+    finally:
+        graph.remove_listener(listener)
