@@ -12,7 +12,3 @@ class Placeholder(CoreNode):
     def __init__(self, loc: Location = None):
         super().__init__([], {}, loc)
 
-
-class Transpose(CoreNode):
-    def __init__(self, arg: module.Node, loc: Location = None):
-        super().__init__([arg], {}, loc)
