@@ -125,7 +125,7 @@ class Graph:
         for listener in self.listeners:
             listener.before_remove_node(self, node)
 
-    def do_remove(self):
+    def do_remove_dead_node(self):
         self.nodes = [node for node in self.nodes if not node.dead]
 
     def __str__(self):
