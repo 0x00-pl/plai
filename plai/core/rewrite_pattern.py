@@ -34,16 +34,23 @@ class TypedRewritePattern(RewritePattern, ABC):
 
 
 class RewritePatternList(RewritePattern):
-    def __init__(self, patterns: [RewritePattern]):
+    def __init__(self, patterns: [RewritePattern] = None):
+        if patterns is None:
+            patterns = []
+
         self.patterns = []
         self.typed_pattern_map: typing.Dict[typing.Type, typing.List[TypedRewritePattern]] = {}
+
         for pattern in patterns:
-            if not isinstance(pattern, TypedRewritePattern):
-                if pattern.node_cls not in self.typed_pattern_map:
-                    self.typed_pattern_map[pattern.node_cls] = []
-                self.typed_pattern_map[pattern.node_cls].append(pattern)
-            else:
-                self.patterns.append(pattern)
+            self.add(pattern)
+
+    def add(self, pattern: RewritePattern):
+        if isinstance(pattern, TypedRewritePattern):
+            if pattern.node_cls not in self.typed_pattern_map:
+                self.typed_pattern_map[pattern.node_cls] = []
+            self.typed_pattern_map[pattern.node_cls].append(pattern)
+        else:
+            self.patterns.append(pattern)
 
     def match_and_replace(self, graph: module.Graph, node: module.Node) -> bool:
         for pattern in self.patterns:
