@@ -128,6 +128,21 @@ class Graph:
     def do_remove_dead_node(self):
         self.nodes = [node for node in self.nodes if not node.dead]
 
+    def replace_all_uses_with(self, old_node: Node, new_node: Node):
+        # todo: add used_list in Node
+        for node in self.nodes:
+            for idx, operand in enumerate(node.operands):
+                if operand == old_node:
+                    node.operands[idx] = new_node
+
+        for idx, output in enumerate(self.arguments):
+            if output == old_node:
+                self.arguments[idx] = new_node
+
+        for idx, output in enumerate(self.outputs):
+            if output == old_node:
+                self.outputs[idx] = new_node
+
     def __str__(self):
         node_name_dict: Dict[Optional[Node], str] = {None: 'None'}
         node_name_dict = node_name_dict | {node: f'arg{idx}' for idx, node in enumerate(self.arguments)}
@@ -145,6 +160,6 @@ class Graph:
 def listener_context(graph: Graph, listener: Graph.Listener):
     graph.add_listener(listener)
     try:
-        yield
+        yield listener
     finally:
         graph.remove_listener(listener)
