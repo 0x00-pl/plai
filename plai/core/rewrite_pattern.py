@@ -66,11 +66,11 @@ class RewritePatternList(RewritePattern):
     def get_typed_pattern_list_from_cls(self, node_cls: type) -> typing.List[TypedRewritePattern]:
         cls_list = inspect.getmro(node_cls)
         for cls in cls_list:
-            if not isinstance(cls, module.Node):
+            if not issubclass(cls, module.Node):
                 continue
 
             if cls in self.typed_pattern_map:
-                return self.typed_pattern_map[type(cls)]
+                return self.typed_pattern_map[cls]
         return []
 
 
