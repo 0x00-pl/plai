@@ -7,6 +7,7 @@ from plai.core import core_dialect
 from plai.core.location import NamedLocation
 from plai.core.module import Graph, Node
 from plai.dialect import aten_dialect, torch_dialect
+from plai.pipelines.convertion_dialect_torch_to_plai import TorchToPlaiPass
 from plai.pl_torch_compiler import torch_to_plai_convertion
 
 
@@ -58,10 +59,15 @@ class CustomCompiler:
                 raise ValueError(f"Unsupported op: {node.op}")
 
             node_mapping_dict[node] = new_node
-            return graph
+
+        return graph
 
     def __call__(self, gm: fx.GraphModule, example_inputs: Tuple[torch.Tensor, ...]) -> Callable:
         self.graph = self.import_graph(gm, self.node_mapping_dict)
+
+        pipeline = TorchToPlaiPass()
+        changed = pipeline(self.graph)
+        _ = changed
 
         # 返回未修改的前向传播函数
         return gm.forward
