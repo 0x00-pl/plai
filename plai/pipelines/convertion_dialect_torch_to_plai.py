@@ -48,7 +48,7 @@ class ConvertAddmm(rewrite_pattern.TypedRewritePattern):
 
 class TorchToPlaiPass(pipeline.Pass):
     def __init__(self):
-        super().__init__('torch_to_plai')
+        super().__init__()
 
     def __call__(self, graph: module.Graph) -> bool:
         """

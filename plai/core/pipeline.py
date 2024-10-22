@@ -2,7 +2,8 @@ import typing
 
 
 class Pass:
-    def __init__(self, name):
+    def __init__(self, name=None):
+        name = name or self.__class__.__name__
         self.name = name
 
     def __call__(self, graph) -> bool:
@@ -53,6 +54,9 @@ class Pipeline(Pass):
     def __call__(self, graph) -> bool:
         changed = False
         for step in self.steps:
+            # print(f'=== before step {step.name} ===')
+            # print(graph)
+
             step_changed = step(graph)
             changed = changed or step_changed
         return changed
