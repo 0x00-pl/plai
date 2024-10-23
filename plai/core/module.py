@@ -120,6 +120,8 @@ class Graph:
         for listener in self.listeners:
             listener.after_add_node(self, node, self.insert_point_index)
 
+        return node
+
     def remove_node(self, node: Node):
         node.dead = True
         for listener in self.listeners:
