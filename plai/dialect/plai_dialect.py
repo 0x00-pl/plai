@@ -10,6 +10,14 @@ class PlaiNode(module.Node):
         return 'plai'
 
 
+class Constant(PlaiNode):
+    def __init__(self, value, loc: Location = None):
+        super().__init__([], {'value': value}, loc)
+
+    def get_value(self):
+        return self.attrs['value']
+
+
 class Transpose(PlaiNode):
     def __init__(self, arg: module.Node, permutation: List = None, loc: Location = None):
         permutation = permutation if permutation is not None else [1, 0]
@@ -31,6 +39,36 @@ class AddMm(PlaiNode):
     @classmethod
     def get_cls_name(cls):
         return 'add_mm'
+
+    def get_bias(self):
+        return self.operands[0]
+
+    def get_mat1(self):
+        return self.operands[1]
+
+    def get_mat2(self):
+        return self.operands[2]
+
+    def get_alpha(self):
+        return self.attrs['alpha']
+
+    def get_beta(self):
+        return self.attrs['beta']
+
+
+class Add(PlaiNode):
+    def __init__(self, arg1: module.Node, arg2: module.Node, loc: Location = None):
+        super().__init__([arg1, arg2], {}, loc)
+
+
+class Mul(PlaiNode):
+    def __init__(self, arg1: module.Node, arg2: module.Node, loc: Location = None):
+        super().__init__([arg1, arg2], {}, loc)
+
+
+class MatMul(PlaiNode):
+    def __init__(self, arg1: module.Node, arg2: module.Node, loc: Location = None):
+        super().__init__([arg1, arg2], {}, loc)
 
 
 def register_dialect():
