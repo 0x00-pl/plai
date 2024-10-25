@@ -6,8 +6,10 @@ import torch.fx as fx
 from plai.core import core_dialect
 from plai.core.location import NamedLocation
 from plai.core.module import Graph, Node
+from plai.core.pipeline import Pipeline
 from plai.dialect import aten_dialect, torch_dialect
 from plai.pipelines.convertion_dialect_torch_to_plai import TorchToPlaiPass
+from plai.pipelines.decompose_plai_addmm import DecomposePlaiAddMmPass
 from plai.pl_torch_compiler import torch_to_plai_convertion
 
 
@@ -65,7 +67,8 @@ class CustomCompiler:
     def __call__(self, gm: fx.GraphModule, example_inputs: Tuple[torch.Tensor, ...]) -> Callable:
         self.graph = self.import_graph(gm, self.node_mapping_dict)
 
-        pipeline = TorchToPlaiPass()
+        pipeline = Pipeline('compile_pipeline', [TorchToPlaiPass(), DecomposePlaiAddMmPass()])
+
         changed = pipeline(self.graph)
         _ = changed
 
