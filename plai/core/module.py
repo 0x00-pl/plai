@@ -6,11 +6,11 @@ from typing import List, Dict, Optional
 from plai.core.location import Location
 
 
-class NodePattern:
-    def __init__(self, node_cls, operands: List['NodePattern|Node'], attrs: dict):
-        self.node_cls = node_cls
-        self.operands = operands
-        self.attrs = attrs
+# class NodePattern:
+#     def __init__(self, node_cls, operands: List['NodePattern|Node'], attrs: dict):
+#         self.node_cls = node_cls
+#         self.operands = operands
+#         self.attrs = attrs
 
 
 class Node(ABC):
