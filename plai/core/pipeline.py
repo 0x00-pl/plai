@@ -46,26 +46,23 @@ class UntilStablePass(Pass):
 
 
 class Pipeline(Pass):
-    def __init__(self, name: str = None, steps: typing.List[Pass] = None, metadata: dict = None):
+    def __init__(self, name: str = None, passes: typing.Sequence[Pass] = None, metadata: dict = None):
         super().__init__(name or f'pipeline')
-        self.steps = steps or []
+        self.passes = list(passes) or []
         self.metadata = metadata or {}
 
     def __call__(self, graph) -> bool:
         changed = False
-        for step in self.steps:
-            # print(f'=== before step {step.name} ===')
+        for cur_pass in self.passes:
+            # print(f'=== before pass {cur_pass.name} ===')
             # print(graph)
 
-            step_changed = step(graph)
+            step_changed = cur_pass(graph)
             changed = changed or step_changed
         return changed
 
     def __repr__(self):
-        return f"Pipeline({repr(self.steps)})"
+        return f"Pipeline({repr(self.passes)})"
 
-    def add_step(self, step: Pass):
-        self.steps.append(step)
-
-
-
+    def add_pass(self, cur_pass: Pass):
+        self.passes.append(cur_pass)
