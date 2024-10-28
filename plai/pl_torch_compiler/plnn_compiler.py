@@ -1,4 +1,4 @@
-from typing import Tuple, Callable, List, Dict
+from typing import Tuple, Callable, List, Dict, Sequence
 
 import torch
 import torch.fx as fx
@@ -6,15 +6,17 @@ import torch.fx as fx
 from plai.core import core_dialect
 from plai.core.location import NamedLocation
 from plai.core.module import Graph, Node
-from plai.core.pipeline import Pipeline
+from plai.core.pipeline import Pipeline, Pass
 from plai.dialect import aten_dialect, torch_dialect
-from plai.pipelines.convertion_dialect_torch_to_plai import TorchToPlaiPass
-from plai.pipelines.decompose_plai_addmm import DecomposePlaiAddMmPass
 from plai.pl_torch_compiler import torch_to_plai_convertion
 
 
 class CustomCompiler:
-    def __init__(self):
+    def __init__(self, pipeline: Sequence[Pass] | Pass | None = None, runtime=None):
+        if isinstance(pipeline, Sequence):
+            pipeline = Pipeline('compile_pipeline', pipeline)
+        self.pipeline = pipeline
+        self.runtime = runtime
         self.graph = Graph('main_graph')
         self.node_mapping_dict: Dict[torch.fx.Node, Node] = {}
 
@@ -67,10 +69,16 @@ class CustomCompiler:
     def __call__(self, gm: fx.GraphModule, example_inputs: Tuple[torch.Tensor, ...]) -> Callable:
         self.graph = self.import_graph(gm, self.node_mapping_dict)
 
-        pipeline = Pipeline('compile_pipeline', [TorchToPlaiPass(), DecomposePlaiAddMmPass()])
+        if self.pipeline is not None:
+            changed = self.pipeline(self.graph)
+            _ = changed
 
-        changed = pipeline(self.graph)
-        _ = changed
+        if self.runtime is None:
+            # 返回未修改的前向传播函数
+            return gm.forward
 
-        # 返回未修改的前向传播函数
-        return gm.forward
+        def forward(*input_tensors):
+            assert len(input_tensors) == len(example_inputs)
+            return self.runtime(self.graph, input_tensors)
+
+        return forward
