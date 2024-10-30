@@ -6,13 +6,6 @@ from typing import List, Dict, Optional
 from plai.core.location import Location
 
 
-# class NodePattern:
-#     def __init__(self, node_cls, operands: List['NodePattern|Node'], attrs: dict):
-#         self.node_cls = node_cls
-#         self.operands = operands
-#         self.attrs = attrs
-
-
 class Node(ABC):
     def __init__(self, operands: List['Node'], attrs: dict, loc: Location = None):
         self.operands = operands
@@ -64,31 +57,34 @@ class Node(ABC):
 
 
 class Graph:
-    class Listener:
-        def after_add_node(self, graph: 'Graph', node: Node, insert_point_index: int):
-            pass
-
-        def before_remove_node(self, graph: 'Graph', node: Node):
-            pass
-
     def __init__(self, name=''):
         self.name = name
         self.arguments: List[Node] = []
         self.nodes: List[Node] = []
         self.outputs: List[Node] = []
-        self.insert_point_index: int = 0
+        self.insert_point_index: int | None = 0
         self.listeners: List[Graph.Listener] = []
         self.add_listener(Graph.UpdateInsertPointListener())
 
-    class UpdateInsertPointListener(Listener):
-        def after_add_node(self, graph: 'Graph', node: Node, insert_point_index: int):
-            if insert_point_index <= graph.insert_point_index:
-                graph.insert_point_index += 1
+    class Listener:
+        def after_add_node(self, graph: 'Graph', node: Node):
+            pass
 
         def before_remove_node(self, graph: 'Graph', node: Node):
-            remove_index = graph.nodes.index(node)
-            if remove_index < graph.insert_point_index:
-                graph.insert_point_index -= 1
+            pass
+
+        def before_remove_dead_node(self, graph: 'Graph'):
+            pass
+
+        def node_operand_changed(self, graph: 'Graph', node: Node, idx: int, old_operand: Node, new_operand: Node):
+            pass
+
+    class UpdateInsertPointListener(Listener):
+        def after_add_node(self, graph: 'Graph', node: Node):
+            graph.insert_point_index += 1
+
+        def before_remove_dead_node(self, graph: 'Graph'):
+            graph.insert_point_index = None
 
     def add_listener(self, listener):
         self.listeners.append(listener)
@@ -116,9 +112,11 @@ class Graph:
             self.insert_point_index = self.nodes.index(node)
 
     def add_node(self, node: Node):
+        assert self.insert_point_index is not None, 'Insert point is not set.'
         self.nodes.insert(self.insert_point_index, node)
+
         for listener in self.listeners:
-            listener.after_add_node(self, node, self.insert_point_index)
+            listener.after_add_node(self, node)
 
         return node
 
@@ -128,6 +126,8 @@ class Graph:
             listener.before_remove_node(self, node)
 
     def do_remove_dead_node(self):
+        for listener in self.listeners:
+            listener.before_remove_dead_node(self)
         self.nodes = [node for node in self.nodes if not node.dead]
 
     def replace_all_uses_with(self, old_node: Node, new_node: Node):
@@ -136,6 +136,9 @@ class Graph:
             for idx, operand in enumerate(node.operands):
                 if operand == old_node:
                     node.operands[idx] = new_node
+
+                    for listener in self.listeners:
+                        listener.node_operand_changed(self, node, idx, old_node, new_node)
 
         for idx, output in enumerate(self.arguments):
             if output == old_node:
