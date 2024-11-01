@@ -9,11 +9,12 @@ class TraceChangedListener(module.Graph.Listener):
     def __init__(self):
         self.changed_nodes = []
 
-    def after_add_node(self, graph: module.Graph, node: module.Node, insert_point_index: int):
+    def after_add_node(self, graph: module.Graph, node: module.Node):
         self.changed_nodes.append(node)
 
-    def before_remove_node(self, graph: module.Graph, node: module.Node):
-        pass
+    def node_operand_changed(self, graph: module.Graph, node: module.Node, idx: int, old_operand: module.Node,
+                             new_operand: module.Node):
+        self.changed_nodes.append(node)
 
 
 class RewritePattern(ABC):
@@ -87,6 +88,7 @@ def rewrite_pattern_recursive(graph: module.Graph, pattern: RewritePattern, max_
             for node in todo_node_list:
                 if node.dead:
                     continue
+                graph.set_insert_point_after(node)
                 if pattern.match_and_replace(graph, node):
                     next_todo_node_list.append(node)
                     changed = True
