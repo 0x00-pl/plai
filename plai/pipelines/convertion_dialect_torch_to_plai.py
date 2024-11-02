@@ -9,7 +9,6 @@ class ConvertTranspose(rewrite_pattern.TypedRewritePattern):
 
     def match_and_replace(self, graph: module.Graph, node: module.Node) -> bool:
         assert isinstance(node, dialect.aten_dialect.Transpose)
-        graph.set_insert_point_after(node)
         new_node = plai_dialect.Transpose(node.operands[0])
         graph.add_node(new_node)
         graph.replace_all_uses_with(node, new_node)
@@ -23,7 +22,6 @@ class ConvertRelu(rewrite_pattern.TypedRewritePattern):
 
     def match_and_replace(self, graph: module.Graph, node: module.Node) -> bool:
         assert isinstance(node, dialect.aten_dialect.Relu)
-        graph.set_insert_point_after(node)
         new_node = plai_dialect.Relu(node.operands[0])
         graph.add_node(new_node)
         graph.replace_all_uses_with(node, new_node)
@@ -37,7 +35,6 @@ class ConvertAddmm(rewrite_pattern.TypedRewritePattern):
 
     def match_and_replace(self, graph: module.Graph, node: module.Node) -> bool:
         assert isinstance(node, dialect.aten_dialect.Addmm)
-        graph.set_insert_point_after(node)
         new_node = plai_dialect.AddMm(node.operands[0], node.operands[1], node.operands[2], node.attrs['beta'],
                                       node.attrs['alpha'])
         graph.add_node(new_node)

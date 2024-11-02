@@ -9,7 +9,6 @@ class DecomposeAddMm(rewrite_pattern.TypedRewritePattern):
 
     def match_and_replace(self, graph: module.Graph, node: module.Node) -> bool:
         assert isinstance(node, dialect.plai_dialect.AddMm)
-        graph.set_insert_point_after(node)
         # Decompose AddMm to Add, Mul and Mm
         # out = beta * bias + alpha * (mat1 * mat2)
 
