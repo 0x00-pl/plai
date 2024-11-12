@@ -1,12 +1,15 @@
+import typing
+
 import numpy
 
 from plai.core import runtime
+from plai.core.module import Node
 from plai.dialect.plai_dialect import Transpose, MatMul, Add, Relu
 
 
 class PlaiNumpyRuntime(runtime.Runtime):
     def run(self, graph, input_tensors):
-        node_value_dict = dict(zip(graph.arguments, input_tensors))
+        node_value_dict: typing.Dict[Node, typing.Any] = dict(zip(graph.arguments, input_tensors))
         for node in graph.nodes:
             operand_values = [node_value_dict[operand] for operand in node.operands]
             if isinstance(node, Transpose):
