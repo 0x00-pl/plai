@@ -36,11 +36,19 @@
 - [x] 添加plai的namespace
 - [x] node中添加location信息
 - [x] build函数看起来没用, 考虑移除掉, 或者替换成from_parser.
+- [ ] 整理操作节点的接口(添加, 删除, 修改输入)
+- [ ] 添加类型支持
+- [ ] 添加users
 - [ ] 添加sub-graph的支持
 
 ### 运行时相关
 
 - [x] 添加numpy的namespace, 覆盖简单模型, 用于实现运行时.
+
+### 优化相关
+
+- [x] 添加简单的优化器
+- [ ] 在rewriter使用非迭代器方案
 
 ### 其他
 
