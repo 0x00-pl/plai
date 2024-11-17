@@ -1,67 +1,16 @@
-import re
-from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from typing import List, Dict, Optional
 
-from plai.core.location import Location
-
-
-class Node(ABC):
-    def __init__(self, operands: List['Node'], attrs: dict, loc: Location = None):
-        self.operands = operands
-        self.attrs = attrs
-        self.loc = loc
-        self.dead = False
-
-    @classmethod
-    @abstractmethod
-    def get_namespace(cls):
-        pass
-
-    @classmethod
-    def get_cls_name(cls):
-        camel_case = cls.__name__
-        snake_case = re.sub(r'([A-Z])', r'_\1', camel_case).lower().lstrip('_')
-        return snake_case
-
-    @classmethod
-    def get_op_name(cls, sep='.'):
-        if cls.get_namespace() == '':
-            return cls.get_cls_name()
-        else:
-            return f'{cls.get_namespace()}{sep}{cls.get_cls_name()}'
-
-    subclass_dict = {}
-
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        op_name = cls.get_op_name()
-        assert op_name not in Node.subclass_dict
-        Node.subclass_dict[op_name] = cls
-
-    @staticmethod
-    def get_node_class(op_name: str):
-        assert op_name in Node.subclass_dict, f'Unregister Class with name: {op_name}'
-        return Node.subclass_dict[op_name]
-
-    def to_string(self, node_name_dict: Dict['Node', str]):
-        return f'{self.get_op_name()}({", ".join(node_name_dict[i] for i in self.operands)}) ' \
-               f'{self.attrs if self.attrs else ""}'
-
-    @staticmethod
-    def static_to_string(node: 'Node', node_name_dict: Dict['Node', str]):
-        if node is None:
-            return 'None'
-        else:
-            return node.to_string(node_name_dict)
+from plai.core.core_dialect import Placeholder, Output
+from plai.core.node import Node
 
 
 class Graph:
     def __init__(self, name=''):
         self.name = name
-        self.arguments: List[Node] = []
+        self.arguments: List[Placeholder] = []
+        self.outputs = Output()
         self.nodes: List[Node] = []
-        self.outputs: List[Node] = []
         self.insert_point_index: int | None = 0
         self.listeners: List[Graph.Listener] = []
         self.add_listener(Graph.UpdateInsertPointListener())
@@ -92,12 +41,11 @@ class Graph:
     def remove_listener(self, listener):
         self.listeners.remove(listener)
 
-    def add_argument(self, node: Node):
+    def add_argument(self, node: Placeholder):
         self.arguments.append(node)
 
     def add_output(self, node: Node):
-        # node maybe is None
-        self.outputs.append(node)
+        self.outputs.add_argument(node)
 
     def set_insert_point_after(self, node: Node = None):
         if node is None:
@@ -121,7 +69,7 @@ class Graph:
         return node
 
     def remove_node(self, node: Node):
-        node.dead = True
+        node.remove()
         for listener in self.listeners:
             listener.before_remove_node(self, node)
 
@@ -142,11 +90,12 @@ class Graph:
 
         for idx, output in enumerate(self.arguments):
             if output == old_node:
+                assert isinstance(new_node, Placeholder)
                 self.arguments[idx] = new_node
 
-        for idx, output in enumerate(self.outputs):
+        for idx, output in enumerate(self.outputs.operands):
             if output == old_node:
-                self.outputs[idx] = new_node
+                self.outputs.set_operand(idx, new_node)
 
     def __str__(self):
         node_name_dict: Dict[Optional[Node], str] = {None: 'None'}
@@ -157,7 +106,7 @@ class Graph:
         for idx, node in enumerate(self.nodes):
             name = node_name_dict[node]
             result += f'  {idx}: {name} = {node.to_string(node_name_dict)}\n'
-        result += f'  output ({", ".join(node_name_dict[i] for i in self.outputs)})\n'
+        result += f'  output ({", ".join(node_name_dict[i] for i in self.outputs.operands)})\n'
         return result
 
 
