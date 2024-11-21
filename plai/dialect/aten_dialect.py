@@ -1,8 +1,8 @@
 from abc import ABC
-from typing import Callable, Optional
+from typing import Callable
 
-from plai.core import module
 from plai.core.location import Location
+from plai.core.node import Node
 from plai.dialect.torch_dialect import TorchNode
 
 
@@ -13,7 +13,7 @@ class AtenNode(TorchNode, ABC):
 
 
 class Addmm(AtenNode):
-    def __init__(self, bias: module.Node, mat1: module.Node, mat2: module.Node, beta, alpha, loc: Location = None):
+    def __init__(self, bias: Node, mat1: Node, mat2: Node, beta, alpha, loc: Location = None):
         """
         out = beta * bias + alpha * (mat1 * mat2)
         """
@@ -25,7 +25,7 @@ class Addmm(AtenNode):
 
 
 class Mm(AtenNode):
-    def __init__(self, mat1: module.Node, mat2: module.Node, loc: Location = None):
+    def __init__(self, mat1: Node, mat2: Node, loc: Location = None):
         """
         out = mat1 * mat2
         """
@@ -37,7 +37,7 @@ class Mm(AtenNode):
 
 
 class Sum(AtenNode):
-    def __init__(self, arg: module.Node, dims: [int], keepdim: bool, loc: Location = None):
+    def __init__(self, arg: Node, dims: [int], keepdim: bool, loc: Location = None):
         super().__init__([arg], {'dims': dims, 'keepdim': keepdim}, loc)
 
     @staticmethod
@@ -55,7 +55,7 @@ class Sum(AtenNode):
 
 
 class Relu(AtenNode):
-    def __init__(self, arg: module.Node, loc: Location = None):
+    def __init__(self, arg: Node, loc: Location = None):
         super().__init__([arg], {}, loc)
 
     @staticmethod
@@ -64,7 +64,7 @@ class Relu(AtenNode):
 
 
 class Max(AtenNode):
-    def __init__(self, arg: module.Node, dim: int, keepdim: bool, loc: Location = None):
+    def __init__(self, arg: Node, dim: int, keepdim: bool, loc: Location = None):
         super().__init__([arg], {'dim': dim, 'keepdim': keepdim}, loc)
 
     @staticmethod
@@ -83,7 +83,7 @@ class Max(AtenNode):
 
 
 class ThresholdBackward(AtenNode):
-    def __init__(self, grad_output: module.Node, arg: module.Node, threshold: float, loc: Location = None):
+    def __init__(self, grad_output: Node, arg: Node, threshold: float, loc: Location = None):
         super().__init__([grad_output, arg], {'threshold': threshold}, loc)
 
     @staticmethod
@@ -92,7 +92,7 @@ class ThresholdBackward(AtenNode):
 
 
 class View(AtenNode):
-    def __init__(self, arg: module.Node, shape: [int], loc: Location = None):
+    def __init__(self, arg: Node, shape: [int], loc: Location = None):
         super().__init__([arg], {'shape': shape}, loc)
 
     @staticmethod
@@ -101,7 +101,7 @@ class View(AtenNode):
 
 
 class Transpose(AtenNode):
-    def __init__(self, arg: module.Node, loc: Location = None):
+    def __init__(self, arg: Node, loc: Location = None):
         super().__init__([arg], {}, loc)
 
     @staticmethod
@@ -114,7 +114,7 @@ class Transpose(AtenNode):
 
 
 class Detach(AtenNode):
-    def __init__(self, arg: module.Node, loc: Location = None):
+    def __init__(self, arg: Node, loc: Location = None):
         super().__init__([arg], {}, loc)
 
     @staticmethod
