@@ -1,5 +1,7 @@
 from plai import dialect
-from plai.core import module, pipeline, rewrite_pattern
+from plai.core import pipeline, rewrite_pattern
+from plai.core.graph import Graph
+from plai.core.node import Node
 from plai.dialect import plai_dialect
 
 
@@ -7,7 +9,7 @@ class ConvertTranspose(rewrite_pattern.TypedRewritePattern):
     def __init__(self):
         super().__init__(dialect.aten_dialect.Transpose)
 
-    def match_and_replace(self, graph: module.Graph, node: module.Node) -> bool:
+    def match_and_replace(self, graph: Graph, node: Node) -> bool:
         assert isinstance(node, dialect.aten_dialect.Transpose)
         new_node = plai_dialect.Transpose(node.operands[0])
         graph.add_node(new_node)
@@ -20,7 +22,7 @@ class ConvertRelu(rewrite_pattern.TypedRewritePattern):
     def __init__(self):
         super().__init__(dialect.aten_dialect.Relu)
 
-    def match_and_replace(self, graph: module.Graph, node: module.Node) -> bool:
+    def match_and_replace(self, graph: Graph, node: Node) -> bool:
         assert isinstance(node, dialect.aten_dialect.Relu)
         new_node = plai_dialect.Relu(node.operands[0])
         graph.add_node(new_node)
@@ -33,7 +35,7 @@ class ConvertAddmm(rewrite_pattern.TypedRewritePattern):
     def __init__(self):
         super().__init__(dialect.aten_dialect.Addmm)
 
-    def match_and_replace(self, graph: module.Graph, node: module.Node) -> bool:
+    def match_and_replace(self, graph: Graph, node: Node) -> bool:
         assert isinstance(node, dialect.aten_dialect.Addmm)
         new_node = plai_dialect.AddMm(node.operands[0], node.operands[1], node.operands[2], node.attrs['beta'],
                                       node.attrs['alpha'])
@@ -47,7 +49,7 @@ class TorchToPlaiPass(pipeline.Pass):
     def __init__(self):
         super().__init__()
 
-    def __call__(self, graph: module.Graph) -> bool:
+    def __call__(self, graph: Graph) -> bool:
         """
         :param graph:
         :return: True when changed.

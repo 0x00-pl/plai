@@ -1,5 +1,7 @@
 from plai import dialect
-from plai.core import module, pipeline, rewrite_pattern
+from plai.core import pipeline, rewrite_pattern
+from plai.core.graph import Graph
+from plai.core.node import Node
 from plai.dialect import plai_dialect
 
 
@@ -7,7 +9,7 @@ class DecomposeAddMm(rewrite_pattern.TypedRewritePattern):
     def __init__(self):
         super().__init__(dialect.plai_dialect.AddMm)
 
-    def match_and_replace(self, graph: module.Graph, node: module.Node) -> bool:
+    def match_and_replace(self, graph: Graph, node: Node) -> bool:
         assert isinstance(node, dialect.plai_dialect.AddMm)
         # Decompose AddMm to Add, Mul and Mm
         # out = beta * bias + alpha * (mat1 * mat2)
@@ -36,7 +38,7 @@ class DecomposePlaiAddMmPass(pipeline.Pass):
     def __init__(self):
         super().__init__()
 
-    def __call__(self, graph: module.Graph) -> bool:
+    def __call__(self, graph: Graph) -> bool:
         pattern_list = rewrite_pattern.RewritePatternList([DecomposeAddMm()])
         changed = rewrite_pattern.rewrite_pattern_recursive(graph, pattern_list)
         return changed
