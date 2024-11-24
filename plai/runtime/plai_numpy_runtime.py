@@ -3,7 +3,7 @@ import typing
 import numpy
 
 from plai.core import runtime
-from plai.core.module import Node
+from plai.core.node import Node
 from plai.dialect.plai_dialect import Transpose, MatMul, Add, Relu
 
 
@@ -25,4 +25,5 @@ class PlaiNumpyRuntime(runtime.Runtime):
 
             node_value_dict[node] = result
 
-        return [node_value_dict[output] for output in graph.outputs]
+        print(graph)
+        return [node_value_dict[output] for output in graph.outputs.operands]

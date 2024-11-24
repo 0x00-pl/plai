@@ -4,8 +4,9 @@ import torch
 import torch.fx as fx
 
 from plai.core import core_dialect
+from plai.core.graph import Graph
 from plai.core.location import NamedLocation
-from plai.core.module import Graph, Node
+from plai.core.node import Node
 from plai.core.pipeline import Pipeline, Pass
 from plai.core.runtime import Runtime
 from plai.dialect import aten_dialect, torch_dialect
