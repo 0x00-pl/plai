@@ -2,25 +2,26 @@ import inspect
 import typing
 from abc import ABC, abstractmethod
 
-from plai.core import module
+from plai.core.graph import Graph, listener_context
+from plai.core.node import Node
 
 
-class TraceChangedListener(module.Graph.Listener):
+class TraceChangedListener(Graph.Listener):
     def __init__(self):
         self.changed_nodes = []
 
-    def after_add_node(self, graph: module.Graph, node: module.Node):
+    def after_add_node(self, graph: Graph, node: Node):
         self.changed_nodes.append(node)
 
-    def node_operand_changed(self, graph: module.Graph, node: module.Node, idx: int, old_operand: module.Node,
-                             new_operand: module.Node):
+    def node_operand_changed(self, graph: Graph, node: Node, idx: int, old_operand: Node,
+                             new_operand: Node):
         self.changed_nodes.append(node)
 
 
 class RewritePattern(ABC):
     @staticmethod
     @abstractmethod
-    def match_and_replace(graph: module.Graph, node: module.Node) -> bool:
+    def match_and_replace(graph: Graph, node: Node) -> bool:
         """
         :param graph:
         :param node: The node to match and replace.
@@ -53,7 +54,7 @@ class RewritePatternList(RewritePattern):
         else:
             self.patterns.append(pattern)
 
-    def match_and_replace(self, graph: module.Graph, node: module.Node) -> bool:
+    def match_and_replace(self, graph: Graph, node: Node) -> bool:
         for pattern in self.patterns:
             if pattern.match_and_replace(graph, node):
                 return True
@@ -67,7 +68,7 @@ class RewritePatternList(RewritePattern):
     def get_typed_pattern_list_from_cls(self, node_cls: type) -> typing.List[TypedRewritePattern]:
         cls_list = inspect.getmro(node_cls)
         for cls in cls_list:
-            if not issubclass(cls, module.Node):
+            if not issubclass(cls, Node):
                 continue
 
             if cls in self.typed_pattern_map:
@@ -75,7 +76,7 @@ class RewritePatternList(RewritePattern):
         return []
 
 
-def rewrite_pattern_recursive(graph: module.Graph, pattern: RewritePattern, max_replace_count_factor: int = 10) -> bool:
+def rewrite_pattern_recursive(graph: Graph, pattern: RewritePattern, max_replace_count_factor: int = 10) -> bool:
     changed = False
     processed_replace_count = 0
     todo_node_list = list(graph.nodes)
@@ -84,7 +85,7 @@ def rewrite_pattern_recursive(graph: module.Graph, pattern: RewritePattern, max_
     while todo_node_list:
         assert processed_replace_count < max_replace_count, 'Infinite loop detected.'
         next_todo_node_list = []
-        with module.listener_context(graph, TraceChangedListener()) as trace_changed:
+        with listener_context(graph, TraceChangedListener()) as trace_changed:
             for node in todo_node_list:
                 if node.dead:
                     continue

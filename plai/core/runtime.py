@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from plai.core.module import Graph
+from plai.core.graph import Graph
 
 
 class Runtime:
@@ -11,5 +11,3 @@ class Runtime:
     @abstractmethod
     def run(self, graph: Graph, input_tensors) -> Graph:
         pass
-
-
