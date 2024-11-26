@@ -6,7 +6,7 @@ from torch import fx
 from torch._ops import OpOverload
 
 from plai.core.location import NamedLocation, Location
-from plai.core.module import Node
+from plai.core.node import Node
 
 
 class Converter:

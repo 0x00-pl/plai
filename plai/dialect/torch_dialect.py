@@ -1,11 +1,11 @@
 from abc import abstractmethod
 from typing import Callable
 
-from plai.core import module
 from plai.core.location import Location
+from plai.core.node import Node
 
 
-class TorchNode(module.Node):
+class TorchNode(Node):
     @classmethod
     def get_namespace(cls):
         return 'torch'
@@ -32,7 +32,7 @@ class TorchNode(module.Node):
 
 
 class GetItem(TorchNode):
-    def __init__(self, arg: module.Node, key, loc: Location = None):
+    def __init__(self, arg: Node, key, loc: Location = None):
         super().__init__([arg], {'key': key}, loc)
 
     @staticmethod
@@ -46,7 +46,7 @@ class GetItem(TorchNode):
 
 
 class Linear(TorchNode):
-    def __init__(self, arg: module.Node, weight: module.Node, bias: module.Node, loc: Location = None):
+    def __init__(self, arg: Node, weight: Node, bias: Node, loc: Location = None):
         """
         out = arg * weight.T + bias
         """
@@ -63,7 +63,7 @@ class Linear(TorchNode):
 
 
 class Relu(TorchNode):
-    def __init__(self, arg: module.Node, loc: Location = None):
+    def __init__(self, arg: Node, loc: Location = None):
         super().__init__([arg], {}, loc)
 
     @staticmethod
