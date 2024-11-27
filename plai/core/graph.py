@@ -79,14 +79,13 @@ class Graph:
         self.nodes = [node for node in self.nodes if not node.dead]
 
     def replace_all_uses_with(self, old_node: Node, new_node: Node):
-        # todo: add used_list in Node
-        for node in self.nodes:
-            for idx, operand in enumerate(node.operands):
+        for user in old_node.users:
+            for idx, operand in enumerate(user.operands):
                 if operand == old_node:
-                    node.operands[idx] = new_node
+                    user.set_operand(idx, new_node)
 
                     for listener in self.listeners:
-                        listener.node_operand_changed(self, node, idx, old_node, new_node)
+                        listener.node_operand_changed(self, user, idx, old_node, new_node)
 
         for idx, output in enumerate(self.arguments):
             if output == old_node:
