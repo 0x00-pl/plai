@@ -10,7 +10,7 @@ class Graph:
         self.name = name
         self.arguments: List[Placeholder] = []
         self.outputs = Output()
-        self.nodes: List[Node] = []
+        self.nodes: List[Node] = [self.outputs]
         self.insert_point_index: int | None = 0
         self.listeners: List[Graph.Listener] = []
         self.add_listener(Graph.UpdateInsertPointListener())
@@ -79,7 +79,8 @@ class Graph:
         self.nodes = [node for node in self.nodes if not node.dead]
 
     def replace_all_uses_with(self, old_node: Node, new_node: Node):
-        for user in old_node.users:
+        old_users = old_node.users.copy()
+        for user in old_users:
             for idx, operand in enumerate(user.operands):
                 if operand == old_node:
                     user.set_operand(idx, new_node)
@@ -104,8 +105,11 @@ class Graph:
         result = f'Graph {self.name}({", ".join(node_name_dict[i] for i in self.arguments)}): \n'
         for idx, node in enumerate(self.nodes):
             name = node_name_dict[node]
-            result += f'  {idx}: {name} = {node.to_string(node_name_dict)}\n'
-        result += f'  output ({", ".join(node_name_dict[i] for i in self.outputs.operands)})\n'
+            if node != self.outputs:
+                result += f'  {idx}: {name} = {node.to_string(node_name_dict)}\n'
+            else:
+                result += f'  {idx}: {node.to_string(node_name_dict)}\n'
+
         return result
 
 
