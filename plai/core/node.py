@@ -57,6 +57,11 @@ class Node(ABC):
         if new_operand is not None:
             new_operand.add_user(self)
 
+    def replace_operand(self, old_operand: 'Node', new_operand: 'Node'):
+        for idx, operand in enumerate(self.operands):
+            if operand == old_operand:
+                self.set_operand(idx, new_operand)
+
     def remove(self):
         self.dead = True
         for operand in self.operands:
