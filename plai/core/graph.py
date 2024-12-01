@@ -12,6 +12,7 @@ class Graph:
         self.outputs = Output()
         self.nodes: List[Node] = [self.outputs]
         self.insert_point_index: int | None = 0
+        self.lock_structure = False
         self.listeners: List[Graph.Listener] = []
         self.add_listener(Graph.UpdateInsertPointListener())
 
@@ -25,7 +26,7 @@ class Graph:
         def before_remove_dead_node(self, graph: 'Graph'):
             pass
 
-        def node_operand_changed(self, graph: 'Graph', node: Node, idx: int, old_operand: Node, new_operand: Node):
+        def before_node_operand_change(self, graph: 'Graph', node: Node, old_operand: Node, new_operand: Node):
             pass
 
     class UpdateInsertPointListener(Listener):
@@ -34,17 +35,30 @@ class Graph:
 
         def before_remove_dead_node(self, graph: 'Graph'):
             graph.insert_point_index = None
-
+            
     def add_listener(self, listener):
         self.listeners.append(listener)
 
     def remove_listener(self, listener):
         self.listeners.remove(listener)
 
+    @contextmanager
+    def lock_structure_context(self):
+        self.lock_structure = True
+        yield
+        self.lock_structure = False
+
+    def walk(self, cb):
+        with self.lock_structure_context():
+            for node in self.nodes:
+                cb(node)
+
     def add_argument(self, node: Placeholder):
+        assert not self.lock_structure, 'Cannot modify graph structure in locked graph.'
         self.arguments.append(node)
 
     def add_output(self, node: Node):
+        assert not self.lock_structure, 'Cannot modify graph structure in locked graph.'
         self.outputs.add_argument(node)
 
     def set_insert_point_after(self, node: Node = None):
@@ -60,6 +74,7 @@ class Graph:
             self.insert_point_index = self.nodes.index(node)
 
     def add_node(self, node: Node):
+        assert not self.lock_structure, 'Cannot modify graph structure in locked graph.'
         assert self.insert_point_index is not None, 'Insert point is not set.'
         self.nodes.insert(self.insert_point_index, node)
 
@@ -69,24 +84,25 @@ class Graph:
         return node
 
     def remove_node(self, node: Node):
+        assert not self.lock_structure, 'Cannot modify graph structure in locked graph.'
         node.remove()
         for listener in self.listeners:
             listener.before_remove_node(self, node)
 
     def do_remove_dead_node(self):
+        assert not self.lock_structure, 'Cannot modify graph structure in locked graph.'
         for listener in self.listeners:
             listener.before_remove_dead_node(self)
         self.nodes = [node for node in self.nodes if not node.dead]
 
     def replace_all_uses_with(self, old_node: Node, new_node: Node):
-        old_users = old_node.users.copy()
+        assert not self.lock_structure, 'Cannot modify graph structure in locked graph.'
+        old_users = old_node.users.copy()  # need to copy because users will be modified in the loop
         for user in old_users:
-            for idx, operand in enumerate(user.operands):
-                if operand == old_node:
-                    user.set_operand(idx, new_node)
+            for listener in self.listeners:
+                listener.before_node_operand_change(self, user, old_node, new_node)
 
-                    for listener in self.listeners:
-                        listener.node_operand_changed(self, user, idx, old_node, new_node)
+            user.replace_operand(old_node, new_node)
 
         for idx, output in enumerate(self.arguments):
             if output == old_node:
