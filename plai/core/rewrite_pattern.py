@@ -13,8 +13,7 @@ class TraceChangedListener(Graph.Listener):
     def after_add_node(self, graph: Graph, node: Node):
         self.changed_nodes.append(node)
 
-    def node_operand_changed(self, graph: Graph, node: Node, idx: int, old_operand: Node,
-                             new_operand: Node):
+    def before_node_operand_change(self, graph: Graph, node: Node, old_operand: Node, new_operand: Node):
         self.changed_nodes.append(node)
 
 
@@ -79,7 +78,9 @@ class RewritePatternList(RewritePattern):
 def rewrite_pattern_recursive(graph: Graph, pattern: RewritePattern, max_replace_count_factor: int = 10) -> bool:
     changed = False
     processed_replace_count = 0
-    todo_node_list = list(graph.nodes)
+    todo_node_list = []
+    graph.walk(todo_node_list.append)
+
     max_replace_count = len(todo_node_list) * max_replace_count_factor
 
     while todo_node_list:
