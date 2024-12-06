@@ -44,7 +44,7 @@
 ### 运行时相关
 
 - [x] 添加numpy的namespace, 覆盖简单模型, 用于实现运行时.
-- [ ] 添加backend
+- [x] 添加backend
 
 ### 优化相关
 
