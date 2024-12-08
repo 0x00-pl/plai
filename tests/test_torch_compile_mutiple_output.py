@@ -13,7 +13,7 @@ def test_torch_plnn_compile_multiple_output():
     input_data = torch.randn(1, 10)
     expected_output = model(input_data)
     actual_output = compiled_model(input_data)
-    assert torch.allclose(expected_output.values, actual_output.values)
+    assert torch.allclose(expected_output.values, actual_output.value)
     assert torch.allclose(expected_output.indices, actual_output.indices)
     print('dump compile forward:')
     print(custom_compiler.graph)
