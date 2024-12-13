@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import List, Dict, Union
 
 from plai.core.location import Location
+from plai.core.type_notation import TypeNotation, UnknownType
 
 
 class Node(ABC):
@@ -12,9 +13,12 @@ class Node(ABC):
         self.loc = loc
         self.dead = False
         self.users = set()
+        self.type_notation: TypeNotation = UnknownType()
 
         for idx, operand in enumerate(operands):
             self.set_operand(idx, operand)
+
+        self.update_type_notation()
 
     @classmethod
     @abstractmethod
@@ -72,6 +76,10 @@ class Node(ABC):
     def get_node_class(op_name: str):
         assert op_name in Node.subclass_dict, f'Unregister Class with name: {op_name}'
         return Node.subclass_dict[op_name]
+
+    @abstractmethod
+    def update_type_notation(self):
+        pass
 
     def to_string(self, node_name_dict: Dict['Node', str]):
         return f'{self.get_op_name()}({", ".join(node_name_dict[i] for i in self.operands)}) ' \
