@@ -13,6 +13,10 @@ class UnknownType(TypeNotation):
     def __init__(self):
         super().__init__('?')
 
+class NoneType(TypeNotation):
+    def __init__(self):
+        super().__init__('None')
+
 
 class ScalarType(TypeNotation):
     def __init__(self, name: str):
@@ -30,7 +34,7 @@ class TensorType(TypeNotation):
 
 
 class TupleType(TypeNotation):
-    def __init__(self, types: typing.Sequence[TypeNotation]):
+    def __init__(self, types: typing.Collection[TypeNotation]):
         super().__init__()
         self.types = types
 
