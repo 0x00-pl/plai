@@ -13,7 +13,7 @@ class Node(ABC):
         self.loc = loc
         self.dead = False
         self.users = set()
-        self.type_notation: TypeNotation = UnknownType()
+        self._type_notation: TypeNotation = UnknownType()
 
         for idx, operand in enumerate(operands):
             self.set_operand(idx, operand)
@@ -61,7 +61,7 @@ class Node(ABC):
         if new_operand is not None:
             new_operand.add_user(self)
 
-        self.type_notation = UnknownType()
+        self._type_notation = UnknownType()
 
     def replace_operand(self, old_operand: 'Node', new_operand: 'Node'):
         for idx, operand in enumerate(self.operands):
@@ -87,7 +87,7 @@ class Node(ABC):
     def get_type_notation(node) -> TypeNotation:
         if isinstance(node, Node):
             node.update_type_notation()
-            return node.type_notation
+            return node._type_notation
         elif node is None:
             return NoneType()
         else:
