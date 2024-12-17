@@ -1,15 +1,14 @@
+from abc import ABC
+
 from plai.core import node
 from plai.core.location import Location
 from plai.core.type_notation import TypeNotation, UnknownType, TupleType
 
 
-class CoreNode(node.Node):
+class CoreNode(node.Node, ABC):
     @classmethod
     def get_namespace(cls):
         return ''
-
-    def update_type_notation(self):
-        pass
 
 
 class Placeholder(CoreNode):
