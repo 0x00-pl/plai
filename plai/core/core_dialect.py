@@ -12,12 +12,12 @@ class CoreNode(node.Node, ABC):
 
 
 class Placeholder(CoreNode):
-    def __init__(self, type_notation: TypeNotation, loc: Location = None):
+    def __init__(self, placeholder_type: TypeNotation, loc: Location = None):
         super().__init__([], {}, loc)
-        self.type_notation = type_notation
+        self.placeholder_type = placeholder_type
 
     def update_type_notation(self):
-        pass
+        return self.placeholder_type
 
 
 class Output(CoreNode):
@@ -30,11 +30,7 @@ class Output(CoreNode):
         self.set_operand(idx, arg)
 
     def update_type_notation(self):
-        if isinstance(self._type_notation, UnknownType):
-            for operand in self.operands:
-                operand.update_type_notation()
-
-            if len(self.operands) == 1:
-                self.type_notation = node.Node.get_type_notation(self.operands[0])
-            else:
-                self.type_notation = TupleType([node.Node.get_type_notation(operand) for operand in self.operands])
+        if len(self.operands) == 1:
+            return node.Node.get_type_notation(self.operands[0])
+        else:
+            return TupleType([node.Node.get_type_notation(operand) for operand in self.operands])
