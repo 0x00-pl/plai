@@ -26,7 +26,7 @@ class ScalarType(TypeNotation):
 class TensorType(TypeNotation):
     def __init__(self, shape: typing.Sequence[int], element_type: TypeNotation):
         super().__init__()
-        self.shape = shape
+        self.shape = list(shape)
         self.element_type = element_type
 
     def __str__(self):
