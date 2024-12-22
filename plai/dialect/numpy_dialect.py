@@ -2,6 +2,7 @@ from abc import ABC
 
 from plai.core.location import Location
 from plai.core.node import Node
+from plai.core.type_notation import TypeNotation
 
 
 class NumpyNode(Node, ABC):
@@ -15,6 +16,5 @@ class Relu(NumpyNode):
     def __init__(self, arg: Node, loc: Location = None):
         super().__init__([arg], {}, loc)
 
-    def update_type_notation(self):
-        for operand in self.operands:
-            operand.update_type_notation()
+    def update_type_notation(self) -> TypeNotation:
+        return Node.get_type_notation(self.operands[0])
