@@ -3,6 +3,7 @@ from typing import Callable
 
 from plai.core.location import Location
 from plai.core.node import Node
+from plai.core.type_notation import ScalarType, TensorType
 from plai.dialect.torch_dialect import TorchNode
 
 
@@ -22,6 +23,44 @@ class Addmm(AtenNode):
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Addmm(args[0], args[1], args[2], attrs.get('beta', 1), attrs.get('alpha', 1), loc)
+
+    def update_type_notation(self):
+        assert len(self.operands) == 3, f'Addmm should have 3 operands, but got {len(self.operands)}'
+        [bias, mat1, mat2] = self.operands
+        bias_type = Node.get_type_notation(bias)
+        mat1_type = Node.get_type_notation(mat1)
+        mat2_type = Node.get_type_notation(mat2)
+        assert isinstance(bias_type,
+                          (ScalarType, TensorType)), f'Addmm bias should be scalar or tensor, but got {bias_type}'
+        assert isinstance(mat1_type, TensorType), f'Addmm mat1 should be tensor, but got {mat1_type}'
+        assert isinstance(mat2_type, TensorType), f'Addmm mat2 should be tensor, but got {mat2_type}'
+        assert mat1_type.element_type == mat2_type.element_type, f'Addmm mat1 and mat2 should have same dtype, but got {mat1_type} and {mat2_type}'
+        assert len(mat1_type.shape) >= 1, f'Addmm mat1 should have at least 1 dimensions, but got {mat1_type}'
+        assert len(mat2_type.shape) >= 2, f'Addmm mat2 should have at least 2 dimensions, but got {mat2_type}'
+        assert (  #
+                mat1_type.shape[-1] == mat2_type.shape[-2]  #
+        ), f'Addmm mat1 and mat2 should be compatible, but got {mat1_type} and {mat2_type}'
+
+        if len(mat1_type.shape) == 1:
+            last_dim = mat1_type.shape[-1]
+            out_shape = mat2_type.shape[-2:] + [last_dim]
+        else:
+            max_rank = max(len(mat1_type.shape), len(mat2_type.shape))
+            padded_mat1_shape = [1] * (max_rank - len(mat1_type.shape)) + mat1_type.shape
+            padded_mat2_shape = [1] * (max_rank - len(mat2_type.shape)) + mat2_type.shape
+            out_shape = []
+            for i in range(max_rank):
+                if padded_mat1_shape[i] == padded_mat2_shape[i]:
+                    out_shape.append(padded_mat1_shape[i])
+                else:
+                    assert (  #
+                            padded_mat1_shape[i] == 1 or padded_mat2_shape[i] == 1  #
+                    ), f'Addmm mat1 and mat2 should be compatible, but got {mat1_type} and {mat2_type}'
+
+                    out_shape.append(max(padded_mat1_shape[i], padded_mat2_shape[i]))
+
+        out_type = TensorType(out_shape, mat1_type.element_type)
+        return out_type
 
 
 class Mm(AtenNode):
