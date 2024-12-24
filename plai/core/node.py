@@ -18,7 +18,6 @@ class Node(ABC):
         for idx, operand in enumerate(operands):
             self.set_operand(idx, operand)
 
-        self.update_type_notation()
 
     @classmethod
     @abstractmethod
