@@ -1,6 +1,7 @@
 from abc import ABC
 from typing import Callable
 
+from plai.core import type_notation
 from plai.core.location import Location
 from plai.core.node import Node
 from plai.core.type_notation import ScalarType, TensorType
@@ -45,19 +46,8 @@ class Addmm(AtenNode):
             last_dim = mat1_type.shape[-1]
             out_shape = mat2_type.shape[-2:] + [last_dim]
         else:
-            max_rank = max(len(mat1_type.shape), len(mat2_type.shape))
-            padded_mat1_shape = [1] * (max_rank - len(mat1_type.shape)) + mat1_type.shape
-            padded_mat2_shape = [1] * (max_rank - len(mat2_type.shape)) + mat2_type.shape
-            out_shape = []
-            for i in range(max_rank):
-                if padded_mat1_shape[i] == padded_mat2_shape[i]:
-                    out_shape.append(padded_mat1_shape[i])
-                else:
-                    assert (  #
-                            padded_mat1_shape[i] == 1 or padded_mat2_shape[i] == 1  #
-                    ), f'Addmm mat1 and mat2 should be compatible, but got {mat1_type} and {mat2_type}'
-
-                    out_shape.append(max(padded_mat1_shape[i], padded_mat2_shape[i]))
+            out_shape = type_notation.broadcast_shape(mat1_type.shape[-2:], mat2_type.shape[-2:])
+            out_shape = out_shape + [mat1_type.shape[-2], mat2_type.shape[-1]]
 
         out_type = TensorType(out_shape, mat1_type.element_type)
         return out_type
@@ -73,6 +63,25 @@ class Mm(AtenNode):
     @staticmethod
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Mm(args[0], args[1], loc)
+
+    def update_type_notation(self):
+        assert len(self.operands) == 2, f'Mm should have 2 operands, but got {len(self.operands)}'
+        [mat1, mat2] = self.operands
+        mat1_type = Node.get_type_notation(mat1)
+        mat2_type = Node.get_type_notation(mat2)
+        assert isinstance(mat1_type, TensorType), f'Mm mat1 should be tensor, but got {mat1_type}'
+        assert isinstance(mat2_type, TensorType), f'Mm mat2 should be tensor, but got {mat2_type}'
+        assert len(mat1_type.shape) >= 2, f'Mm mat1 should have at least 2 dimensions, but got {mat1_type}'
+        assert len(mat2_type.shape) >= 2, f'Mm mat2 should have at least 2 dimensions, but got {mat2_type}'
+        assert (  #
+                mat1_type.shape[-1] == mat2_type.shape[-2]  #
+        ), f'Mm mat1 and mat2 should be compatible, but got {mat1_type} and {mat2_type}'
+
+        out_shape = type_notation.broadcast_shape(mat1_type.shape[:-1], mat2_type.shape[:-2])
+        out_shape = out_shape + [mat1_type.shape[-2], mat2_type.shape[-1]]
+
+        out_type = TensorType(out_shape, mat1_type.element_type)
+        return out_type
 
 
 class Sum(AtenNode):
