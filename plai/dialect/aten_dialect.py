@@ -4,7 +4,7 @@ from typing import Callable
 from plai.core import type_notation
 from plai.core.location import Location
 from plai.core.node import Node
-from plai.core.type_notation import ScalarType, TensorType
+from plai.core.type_notation import ScalarType, TensorType, TypeNotation
 from plai.dialect.torch_dialect import TorchNode
 
 
@@ -100,6 +100,24 @@ class Sum(AtenNode):
     def register_torch_overload(cls, register: Callable[[str, Callable], None]):
         register('torch::sum', cls.from_torch)
         register('torch::sum.dim_IntList', cls.from_torch_overload_dim)
+
+    def update_type_notation(self) -> TypeNotation:
+        assert len(self.operands) == 1, f'Sum should have 1 operand, but got {len(self.operands)}'
+        [arg] = self.operands
+        arg_type = Node.get_type_notation(arg)
+        assert isinstance(arg_type, TensorType), f'Sum arg should be tensor, but got {arg_type}'
+        assert len(arg_type.shape) >= 1, f'Sum arg should have at least 1 dimensions, but got {arg_type}'
+
+        out_shape = []
+        for index, size in enumerate(arg_type.shape):
+            if index in self.attrs['dims']:
+                if self.attrs['keepdim']:
+                    out_shape.append(1)
+            else:
+                out_shape.append(size)
+
+        out_type = TensorType(out_shape, arg_type.element_type)
+        return out_type
 
 
 class Relu(AtenNode):
