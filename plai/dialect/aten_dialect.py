@@ -128,6 +128,14 @@ class Relu(AtenNode):
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Relu(args[0], loc)
 
+    def update_type_notation(self) -> TypeNotation:
+        assert len(self.operands) == 1, f'Relu should have 1 operand, but got {len(self.operands)}'
+        [arg] = self.operands
+        arg_type = Node.get_type_notation(arg)
+        assert isinstance(arg_type, TensorType), f'Relu arg should be tensor, but got {arg_type}'
+        assert len(arg_type.shape) >= 1, f'Relu arg should have at least 1 dimensions, but got {arg_type}'
+        return arg_type
+
 
 class Max(AtenNode):
     def __init__(self, arg: Node, dim: int, keepdim: bool, loc: Location = None):

@@ -1,3 +1,4 @@
+import abc
 from abc import abstractmethod
 from typing import Callable
 
@@ -5,7 +6,7 @@ from plai.core.location import Location
 from plai.core.node import Node
 
 
-class TorchNode(Node):
+class TorchNode(Node, abc.ABC):
     @classmethod
     def get_namespace(cls):
         return 'torch'
