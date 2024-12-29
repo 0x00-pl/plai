@@ -186,6 +186,16 @@ class Transpose(AtenNode):
     def register_torch_overload(cls, register: Callable[[str, Callable], None]):
         register(f'{cls.get_namespace()}::t', cls.from_torch)
 
+    def update_type_notation(self):
+        assert len(self.operands) == 1, f'Transpose should have 1 operand, but got {len(self.operands)}'
+        [arg] = self.operands
+        arg_type = Node.get_type_notation(arg)
+        assert isinstance(arg_type, TensorType), f'Transpose arg should be tensor, but got {arg_type}'
+        assert len(arg_type.shape) >= 2, f'Transpose arg should have at least 2 dimensions, but got {arg_type}'
+        out_shape = arg_type.shape[:-2] + [arg_type.shape[-1], arg_type.shape[-2]]
+        out_type = TensorType(out_shape, arg_type.element_type)
+        return out_type
+
 
 class Detach(AtenNode):
     def __init__(self, arg: Node, loc: Location = None):
