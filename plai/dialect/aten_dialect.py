@@ -155,6 +155,20 @@ class Max(AtenNode):
     def register_torch_overload(cls, register: Callable[[str, Callable], None]):
         register(f'{cls.get_namespace()}::max.dim', cls.from_torch_overload_dim)
 
+    def update_type_notation(self) -> TypeNotation:
+        assert len(self.operands) == 1, f'Max should have 1 operand, but got {len(self.operands)}'
+        [arg] = self.operands
+        arg_type = Node.get_type_notation(arg)
+        assert isinstance(arg_type, TensorType), f'Max arg should be tensor, but got {arg_type}'
+        assert len(arg_type.shape) >= 1, f'Max arg should have at least 1 dimensions, but got {arg_type}'
+        assert self.attrs['dim'] < len(arg_type.shape), f'Max dim should be less than arg dimensions, but got {self.attrs["dim"]} and {len(arg_type.shape)}'
+        if self.attrs['keepdim']:
+            out_shape = arg_type.shape[:self.attrs['dim']] + [1] + arg_type.shape[self.attrs['dim'] + 1:]
+        else:
+            out_shape = arg_type.shape[:self.attrs['dim']] + arg_type.shape[self.attrs['dim'] + 1:]
+
+        return TensorType(out_shape, arg_type.element_type)
+
 
 class ThresholdBackward(AtenNode):
     def __init__(self, grad_output: Node, arg: Node, threshold: float, loc: Location = None):
@@ -186,7 +200,7 @@ class Transpose(AtenNode):
     def register_torch_overload(cls, register: Callable[[str, Callable], None]):
         register(f'{cls.get_namespace()}::t', cls.from_torch)
 
-    def update_type_notation(self):
+    def update_type_notation(self) -> TypeNotation:
         assert len(self.operands) == 1, f'Transpose should have 1 operand, but got {len(self.operands)}'
         [arg] = self.operands
         arg_type = Node.get_type_notation(arg)
