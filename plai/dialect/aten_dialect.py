@@ -178,6 +178,19 @@ class ThresholdBackward(AtenNode):
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return ThresholdBackward(args[0], args[1], args[2], loc)
 
+    def update_type_notation(self) -> TypeNotation:
+        assert len(self.operands) == 2, f'ThresholdBackward should have 2 operands, but got {len(self.operands)}'
+        [grad_output, arg] = self.operands
+        grad_output_type = Node.get_type_notation(grad_output)
+        arg_type = Node.get_type_notation(arg)
+        assert isinstance(grad_output_type, TensorType), f'ThresholdBackward grad_output should be tensor, but got {grad_output_type}'
+        assert isinstance(arg_type, TensorType), f'ThresholdBackward arg should be tensor, but got {arg_type}'
+        assert len(grad_output_type.shape) >= 1, f'ThresholdBackward grad_output should have at least 1 dimensions, but got {grad_output_type}'
+        assert len(arg_type.shape) >= 1, f'ThresholdBackward arg should have at least 1 dimensions, but got {arg_type}'
+        assert grad_output_type.shape == arg_type.shape, f'ThresholdBackward grad_output and arg should have same shape, but got {grad_output_type} and {arg_type}'
+
+        return grad_output_type
+
 
 class View(AtenNode):
     def __init__(self, arg: Node, shape: [int], loc: Location = None):
