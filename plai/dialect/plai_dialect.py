@@ -1,10 +1,14 @@
+from abc import ABC
 from typing import List
+
+import numpy
 
 from plai.core.location import Location
 from plai.core.node import Node
+from plai.core.type_notation import TypeNotation, NoneType, ScalarType, TensorType, UnknownType
 
 
-class PlaiNode(Node):
+class PlaiNode(Node, ABC):
     @classmethod
     def get_namespace(cls):
         return 'plai'
@@ -13,9 +17,24 @@ class PlaiNode(Node):
 class Constant(PlaiNode):
     def __init__(self, value, loc: Location = None):
         super().__init__([], {'value': value}, loc)
+        if isinstance(value, int):
+            self.value_type = ScalarType('int')
+        elif isinstance(value, float):
+            self.value_type = ScalarType('float')
+        elif isinstance(value, bool):
+            self.value_type = ScalarType('bool')
+        elif isinstance(value, numpy.ndarray):
+            self.value_type = TensorType(value.shape, UnknownType())
+        else:
+            raise ValueError(f'Unsupported constant type: {type(value)}')
 
     def get_value(self):
         return self.attrs['value']
+
+    def update_type_notation(self) -> TypeNotation:
+        assert self.operands == [], 'Constant node should not have operands'
+        return self.value_type
+
 
 
 class Transpose(PlaiNode):
