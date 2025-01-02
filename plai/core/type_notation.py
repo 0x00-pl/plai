@@ -60,3 +60,18 @@ def broadcast_shape(shape1: typing.List[int], shape2: typing.List[int]) -> typin
         else:
             raise ValueError(f'Incompatible shapes: {shape1}, {shape2}')
     return list(reversed(result))
+
+
+def get_type_from_value(value):
+    if isinstance(value, int):
+        return ScalarType('int')
+    elif isinstance(value, float):
+        return ScalarType('float')
+    elif isinstance(value, bool):
+        return ScalarType('bool')
+    elif isinstance(value, str):
+        return ScalarType('str')
+    elif isinstance(value, tuple):
+        return TupleType([get_type_from_value(v) for v in value])
+    else:
+        raise ValueError(f'Unsupported constant type: {type(value)}')
