@@ -5,7 +5,7 @@ import numpy
 
 from plai.core.location import Location
 from plai.core.node import Node
-from plai.core.type_notation import TypeNotation, NoneType, ScalarType, TensorType, UnknownType
+from plai.core.type_notation import TypeNotation, ScalarType, TensorType, UnknownType
 
 
 class PlaiNode(Node, ABC):
@@ -36,11 +36,21 @@ class Constant(PlaiNode):
         return self.value_type
 
 
-
 class Transpose(PlaiNode):
     def __init__(self, arg: Node, permutation: List = None, loc: Location = None):
         permutation = permutation if permutation is not None else [1, 0]
         super().__init__([arg], {'permutation': permutation}, loc)
+
+    def get_type_notation(self) -> TypeNotation:
+        assert len(self.operands) == 1, 'Transpose node should have exactly one operand'
+        operand_type = Node.get_type_notation(self.operands[0])
+        assert isinstance(operand_type, TensorType), 'Transpose operand should be a tensor'
+
+        shape = operand_type.shape
+        permutation = self.attrs['permutation']
+        assert len(shape) == len(permutation), 'Permutation length should match operand shape length'
+        new_shape = [shape[i] for i in permutation]
+        return TensorType(new_shape, operand_type.element_type)
 
 
 class Relu(PlaiNode):
