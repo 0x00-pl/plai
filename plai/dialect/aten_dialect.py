@@ -25,7 +25,7 @@ class Addmm(AtenNode):
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Addmm(args[0], args[1], args[2], attrs.get('beta', 1), attrs.get('alpha', 1), loc)
 
-    def update_type_notation(self):
+    def inference_type_notation(self):
         assert len(self.operands) == 3, f'Addmm should have 3 operands, but got {len(self.operands)}'
         [bias, mat1, mat2] = self.operands
         bias_type = Node.get_type_notation(bias)
@@ -64,7 +64,7 @@ class Mm(AtenNode):
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Mm(args[0], args[1], loc)
 
-    def update_type_notation(self):
+    def inference_type_notation(self):
         assert len(self.operands) == 2, f'Mm should have 2 operands, but got {len(self.operands)}'
         [mat1, mat2] = self.operands
         mat1_type = Node.get_type_notation(mat1)
@@ -101,7 +101,7 @@ class Sum(AtenNode):
         register('torch::sum', cls.from_torch)
         register('torch::sum.dim_IntList', cls.from_torch_overload_dim)
 
-    def update_type_notation(self) -> TypeNotation:
+    def inference_type_notation(self) -> TypeNotation:
         assert len(self.operands) == 1, f'Sum should have 1 operand, but got {len(self.operands)}'
         [arg] = self.operands
         arg_type = Node.get_type_notation(arg)
@@ -128,7 +128,7 @@ class Relu(AtenNode):
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return Relu(args[0], loc)
 
-    def update_type_notation(self) -> TypeNotation:
+    def inference_type_notation(self) -> TypeNotation:
         assert len(self.operands) == 1, f'Relu should have 1 operand, but got {len(self.operands)}'
         [arg] = self.operands
         arg_type = Node.get_type_notation(arg)
@@ -155,7 +155,7 @@ class Max(AtenNode):
     def register_torch_overload(cls, register: Callable[[str, Callable], None]):
         register(f'{cls.get_namespace()}::max.dim', cls.from_torch_overload_dim)
 
-    def update_type_notation(self) -> TypeNotation:
+    def inference_type_notation(self) -> TypeNotation:
         assert len(self.operands) == 1, f'Max should have 1 operand, but got {len(self.operands)}'
         [arg] = self.operands
         arg_type = Node.get_type_notation(arg)
@@ -178,7 +178,7 @@ class ThresholdBackward(AtenNode):
     def from_torch(args: list, attrs: dict, loc: Location = None):
         return ThresholdBackward(args[0], args[1], args[2], loc)
 
-    def update_type_notation(self) -> TypeNotation:
+    def inference_type_notation(self) -> TypeNotation:
         assert len(self.operands) == 2, f'ThresholdBackward should have 2 operands, but got {len(self.operands)}'
         [grad_output, arg] = self.operands
         grad_output_type = Node.get_type_notation(grad_output)
@@ -213,7 +213,7 @@ class Transpose(AtenNode):
     def register_torch_overload(cls, register: Callable[[str, Callable], None]):
         register(f'{cls.get_namespace()}::t', cls.from_torch)
 
-    def update_type_notation(self) -> TypeNotation:
+    def inference_type_notation(self) -> TypeNotation:
         assert len(self.operands) == 1, f'Transpose should have 1 operand, but got {len(self.operands)}'
         [arg] = self.operands
         arg_type = Node.get_type_notation(arg)

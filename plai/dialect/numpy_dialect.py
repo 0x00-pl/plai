@@ -16,5 +16,5 @@ class Relu(NumpyNode):
     def __init__(self, arg: Node, loc: Location = None):
         super().__init__([arg], {}, loc)
 
-    def update_type_notation(self) -> TypeNotation:
+    def inference_type_notation(self) -> TypeNotation:
         return Node.get_type_notation(self.operands[0])

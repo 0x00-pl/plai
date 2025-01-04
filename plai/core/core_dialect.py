@@ -16,7 +16,7 @@ class Placeholder(CoreNode):
         super().__init__([], {}, loc)
         self.placeholder_type = placeholder_type
 
-    def update_type_notation(self):
+    def inference_type_notation(self):
         return self.placeholder_type
 
 
@@ -29,7 +29,7 @@ class Output(CoreNode):
         self.operands.append(None)
         self.set_operand(idx, arg)
 
-    def update_type_notation(self):
+    def inference_type_notation(self):
         if len(self.operands) == 1:
             return node.Node.get_type_notation(self.operands[0])
         else:

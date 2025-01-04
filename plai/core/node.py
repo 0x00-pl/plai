@@ -79,7 +79,7 @@ class Node(ABC):
         return Node.subclass_dict[op_name]
 
     @abstractmethod
-    def update_type_notation(self) -> TypeNotation:
+    def inference_type_notation(self) -> TypeNotation:
         pass
 
     @staticmethod
@@ -89,7 +89,7 @@ class Node(ABC):
                 for operand in node.operands:
                     Node.get_type_notation(operand)
 
-                node._type_notation = node.update_type_notation()
+                node._type_notation = node.inference_type_notation()
             return node._type_notation
         elif node is None:
             return NoneType()

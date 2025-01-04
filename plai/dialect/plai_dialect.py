@@ -31,7 +31,7 @@ class Constant(PlaiNode):
     def get_value(self):
         return self.attrs['value']
 
-    def update_type_notation(self) -> TypeNotation:
+    def inference_type_notation(self) -> TypeNotation:
         assert self.operands == [], 'Constant node should not have operands'
         return self.value_type
 
@@ -41,7 +41,7 @@ class Transpose(PlaiNode):
         permutation = permutation if permutation is not None else [1, 0]
         super().__init__([arg], {'permutation': permutation}, loc)
 
-    def get_type_notation(self) -> TypeNotation:
+    def inference_type_notation(self) -> TypeNotation:
         assert len(self.operands) == 1, 'Transpose node should have exactly one operand'
         operand_type = Node.get_type_notation(self.operands[0])
         assert isinstance(operand_type, TensorType), 'Transpose operand should be a tensor'
