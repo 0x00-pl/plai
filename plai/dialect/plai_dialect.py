@@ -5,7 +5,7 @@ import numpy
 
 from plai.core.location import Location
 from plai.core.node import Node
-from plai.core.type_notation import TypeNotation, ScalarType, TensorType, UnknownType
+from plai.core.type_notation import TypeNotation, ScalarType, TensorType, UnknownType, NoneType, broadcast_shape
 
 
 class PlaiNode(Node, ABC):
@@ -57,6 +57,12 @@ class Relu(PlaiNode):
     def __init__(self, arg: Node, loc: Location = None):
         super().__init__([arg], {}, loc)
 
+    def inference_type_notation(self) -> TypeNotation:
+        assert len(self.operands) == 1, 'Relu node should have exactly one operand'
+        operand_type = Node.get_type_notation(self.operands[0])
+        assert isinstance(operand_type, TensorType), 'Relu operand should be a tensor'
+        return TensorType(operand_type.shape, operand_type.element_type)
+
 
 class AddMm(PlaiNode):
     def __init__(self, bias: Node, mat1: Node, mat2: Node, beta, alpha, loc: Location = None):
@@ -83,6 +89,25 @@ class AddMm(PlaiNode):
 
     def get_beta(self):
         return self.attrs['beta']
+
+    def inference_type_notation(self) -> TypeNotation:
+        assert len(self.operands) == 3, 'AddMm node should have exactly three operands'
+        bias_type = Node.get_type_notation(self.get_bias())
+        mat1_type = Node.get_type_notation(self.get_mat1())
+        mat2_type = Node.get_type_notation(self.get_mat2())
+        assert isinstance(bias_type, (TensorType, ScalarType, NoneType)), 'AddMm bias should be a tensor or scalar'
+        assert isinstance(mat1_type, TensorType), 'AddMm mat1 should be a tensor'
+        assert isinstance(mat2_type, TensorType), 'AddMm mat2 should be a tensor'
+        assert mat1_type.element_type == mat2_type.element_type, 'AddMm mat1 and mat2 should have the same element type'
+        element_type = mat1_type.element_type
+
+        mat1_shape = mat1_type.shape
+        mat2_shape = mat2_type.shape
+        if len(mat1_shape) == 1:
+            return TensorType(mat2_shape[:-2] + [mat2_type.shape[-1]], element_type)
+        else:
+            common_shape = broadcast_shape(mat1_shape[:-1], mat2_shape[:-2])
+            return TensorType(common_shape + [mat2_type.shape[-1]], element_type)
 
 
 class Add(PlaiNode):
