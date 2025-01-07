@@ -133,6 +133,21 @@ class Mul(PlaiNode):
     def __init__(self, arg1: Node, arg2: Node, loc: Location = None):
         super().__init__([arg1, arg2], {}, loc)
 
+    def inference_type_notation(self) -> TypeNotation:
+        assert len(self.operands) == 2, 'Mul node should have exactly two operands'
+        operand1_type = Node.get_type_notation(self.operands[0])
+        operand2_type = Node.get_type_notation(self.operands[1])
+
+        assert isinstance(operand1_type, TensorType), 'Mul operand1 should be a tensor'
+        assert isinstance(operand2_type, TensorType), 'Mul operand2 should be a tensor'
+        assert operand1_type.element_type == operand2_type.element_type, 'Mul operands should have the same element type'
+        element_type = operand1_type.element_type
+        shape1 = operand1_type.shape
+        shape2 = operand2_type.shape
+        common_shape = broadcast_shape(shape1, shape2)
+        return TensorType(common_shape, element_type)
+
+
 
 class MatMul(PlaiNode):
     def __init__(self, arg1: Node, arg2: Node, loc: Location = None):
