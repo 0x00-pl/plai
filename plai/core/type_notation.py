@@ -34,7 +34,7 @@ class TensorType(TypeNotation):
 
 
 class TupleType(TypeNotation):
-    def __init__(self, types: typing.Collection[TypeNotation]):
+    def __init__(self, types: typing.Sequence[TypeNotation]):
         super().__init__()
         self.types = types
 
