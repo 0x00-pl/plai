@@ -4,6 +4,7 @@ from typing import Callable
 
 from plai.core.location import Location
 from plai.core.node import Node
+from plai.core.type_notation import TupleType
 
 
 class TorchNode(Node, abc.ABC):
@@ -44,6 +45,14 @@ class GetItem(TorchNode):
     def register_torch_overload(cls, register: Callable[[str, Callable], None]):
         name = '_operator.getitem'
         register(name, cls.from_torch)
+
+    def inference_type_notation(self):
+        key = self.attrs['key']
+        value_type = Node.get_type_notation(self.operands[0])
+        if isinstance(value_type, TupleType) and isinstance(key, int):
+            return value_type.types[key]
+        else:
+            raise ValueError(f'Unsupported key type: {type(key)} for value type: {value_type}')
 
 
 class Linear(TorchNode):
