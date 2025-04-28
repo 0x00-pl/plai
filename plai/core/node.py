@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import List, Dict, Union
 
 from plai.core.location import Location
-from plai.core.type_notation import TypeNotation, UnknownType
+from plai.core.type_notation import TypeNotation, UnknownType, NoneType
 
 
 class Node(ABC):
@@ -61,6 +61,8 @@ class Node(ABC):
         if new_operand is not None:
             new_operand.add_user(self)
 
+        self.type_notation = UnknownType()
+
     def replace_operand(self, old_operand: 'Node', new_operand: 'Node'):
         for idx, operand in enumerate(self.operands):
             if operand == old_operand:
@@ -80,6 +82,16 @@ class Node(ABC):
     @abstractmethod
     def update_type_notation(self):
         pass
+
+    @staticmethod
+    def get_type_notation(node) -> TypeNotation:
+        if isinstance(node, Node):
+            node.update_type_notation()
+            return node.type_notation
+        elif node is None:
+            return NoneType()
+        else:
+            raise TypeError(f'Unsupported type: {type(node)}')
 
     def to_string(self, node_name_dict: Dict['Node', str]):
         return f'{self.get_op_name()}({", ".join(node_name_dict[i] for i in self.operands)}) ' \
